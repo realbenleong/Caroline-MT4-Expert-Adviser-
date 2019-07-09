@@ -805,205 +805,32 @@ void ZigZagExecution(int maxBarsToAnalysePSGIN,int & averageZigZagBarsPSGOUT,boo
                         blankArray,"zigZagdebug"
                         );
 }
-//_________________________________________________________________________________________________
-//''''''''''''''''''''''''''''''''''''''''''''''''''''''''''''''''''''''''''''''''[ACTION FUNCTION]
-void CreateZigZagPeakArrays(int maxBarsBackforZigZagIN)
-{
-   int totalPeakObjects=0;
-   for(int i=0;i<maxBarsBackforZigZagIN;i++)//iLoopCreatePeakObj
-   {
-      barOfObject=i;
-      ProvideBarToTimeConversion(barOfObject-2);
-      priceLevel=ProvidePeakPrice(i,maxBarsBackforZigZagIN);
-      if(priceLevel!=0)
-      {       
-         totalPeakObjects++;
-         ArrayResize(zigZagPeakArrayGLO,totalPeakObjects);
-         ArrayResize(zigZagPeakIDGLO,totalPeakObjects);
-         zigZagPeakArrayGLO[totalPeakObjects-1]=ProvidePeakPrice(i,maxBarsBackforZigZagIN);
-         zigZagPeakIDGLO[totalPeakObjects-1]=ProvideZigZagID(totalPeakObjects);
-      }
-   }
-}
-//_________________________________________________________________________________________________
-//''''''''''''''''''''''''''''''''''''''''''''''''''''''''''''''''''''''''''''''''[ACTION FUNCTION]
-void NormalizeZigZagArrays()
-{
-   int numOfPeaks=ArraySize(zigZagPeakIDGLO);
-   if(StringToInteger(StringDemux(zigZagPeakIDGLO[0],2,","))!=0)
-   {
-      //Delete the last peak to make way for a new one. 
-      zigZagPeakArrayGLO[numOfPeaks-1]=0;
-      ArrayCopy(zigZagPeakArrayGLO,zigZagPeakArrayGLO,1,0,numOfPeaks-1);
-      zigZagPeakIDGLO[numOfPeaks-1]="";
-      ArrayCopy(zigZagPeakIDGLO,zigZagPeakIDGLO,1,0,numOfPeaks-1);
-      if(zigZagPeakArrayGLO[1]>Ask)
-      {
-         //Assign the 0 peak value
-         zigZagPeakArrayGLO[0]=iLow(NULL,0,0);
-         zigZagPeakIDGLO[0]=  "<"+
-                              DoubleToStr(iLow(NULL,0,0))+","+
-                              IntegerToString(-1)+","+
-                              IntegerToString(0)+
-                              ">";
-      }
-      else
-      {
-         //Assign the 0 peak value
-         zigZagPeakArrayGLO[0]=iHigh(NULL,0,0);
-         zigZagPeakIDGLO[0]=  "<"+
-                              DoubleToStr(iHigh(NULL,0,0))+","+
-                              IntegerToString(-1)+","+
-                              IntegerToString(0)+
-                              ">";
-      }
-   }
-}
-//_________________________________________________________________________________________________
-//''''''''''''''''''''''''''''''''''''''''''''''''''''''''''''''''''''''''''''''''[ACTION FUNCTION]
-void CreateZigZagBars(int & averageZigZagBarsOUT)
-{
-   int totalSum=0;
-   int prevValue=0;
-   for(int i=0;i<ArraySize(zigZagPeakIDGLO)-1;i++)
-   {
-      int iValue=StrToInteger(StringDemux(zigZagPeakIDGLO[i],2,","));
-      int nextValue=StrToInteger(StringDemux(zigZagPeakIDGLO[i+1],2,","));
-      totalSum=iValue+prevValue;
-      prevValue=iValue;
-   }
-   averageZigZagBarsOUT=(int)MathCeil(totalSum/(ArraySize(zigZagPeakIDGLO)-1));
-}
-//=========================================[DOCUMENTATION]=========================================
-//averageZigZagBarsOUT is the average distance between 2 zig zag peaks. 
-//_________________________________________________________________________________________________
-//''''''''''''''''''''''''''''''''''''''''''''''''''''''''''''''''''''''''''''''''[ACTION FUNCTION]
-void CreatePeakUpOrDown(bool & is0PeakUpGLOOUT)
-{
-   double priceOfZigZagOrigin0=StrToDouble(StringDemux(zigZagPeakIDGLO[0],0,","));
-   double priceOfZigZagOrigin1=StrToDouble(StringDemux(zigZagPeakIDGLO[1],0,","));
-   if(priceOfZigZagOrigin0>priceOfZigZagOrigin1){is0PeakUpGLOOUT=true;}
-   else{is0PeakUpGLOOUT=false;}
-}
-//=========================================[DOCUMENTATION]=========================================
-//If 0 peak is higher than 1 peak, then is0PeakUpGLOOUT==true.
-//_________________________________________________________________________________________________
-//''''''''''''''''''''''''''''''''''''''''''''''''''''''''''''''''''''''''''''''''[ACTION FUNCTION]
-void CreateZigZagObj(color objColour)
-{
-   int numOfPeaks=ArraySize(zigZagPeakArrayGLO);
-   for(int i=0;i<numOfPeaks-1;i++)//iLoopnumOfPeaks
-   {
-      int iBar=StrToInteger(StringDemux(zigZagPeakIDGLO[i],2,","));
-      int iBarNext=StrToInteger(StringDemux(zigZagPeakIDGLO[i+1],2,","));
-      priceLevel=zigZagPeakArrayGLO[i];
-      priceLevelP2=zigZagPeakArrayGLO[i+1];
-      timeOfTheBar=ProvideBarToTimeConversionUniversal(iBar);
-      timeOfTheBarP2=ProvideBarToTimeConversionUniversal(iBarNext);
-      NameTLine("ZigZagLine_");
-      CreateTLine(0,2,false,objColour);
-   }
-}
-//_________________________________________________________________________________________________
-//''''''''''''''''''''''''''''''''''''''''''''''''''''''''''''''''''''''''''''''''[ACTION FUNCTION]
-void ReevaluateGradientOrigins()
-{
-   if(StrToInteger(StringDemux(zigZagPeakIDGLO[0],1,","))==-1)
-   {
-      for(int i=0;i<ArraySize(zigZagPeakIDGLO);i++)//iLoopzigZagPeakIDGLO
-      {
-         string iItemID0=StringDemux(zigZagPeakIDGLO[i],0,",");
-         string iItemID2=StringDemux(zigZagPeakIDGLO[i],2,",");
-         zigZagPeakIDGLO[i]="<"+iItemID0+","+IntegerToString(i+1)+","+iItemID2;
-      }
-   }
-}
-//_________________________________________________________________________________________________
-//''''''''''''''''''''''''''''''''''''''''''''''''''''''''''''''''''''''''''''''''[ACTION FUNCTION]
-void CreateZigZagTenthLabelObj(color objColour)
-{
-   int iUpOrDown;
-   if(is0PeakUpGLO==true){iUpOrDown=0;}
-   else{iUpOrDown=3;}
-   for(int i=0;i<ArraySize(zigZagPeakIDGLO);i++)//iLoopzigZagPeakIDGLO
-   {
-      int iGradOrigin=StrToInteger(StringDemux(zigZagPeakIDGLO[i],1,","));
-      if(MathMod(iGradOrigin,10)==0)
-      {
-         int iBar=StrToInteger(StringDemux(zigZagPeakIDGLO[i],2,","));
-         priceLevel=zigZagPeakArrayGLO[i];
-         timeOfTheBar=ProvideBarToTimeConversionUniversal(iBar);
-         NameTextBox("ZigZagTenth_");
-         CreateTextBox(IntegerToString(iGradOrigin),10,objColour,iUpOrDown);
-      }
-   }
-}
-//_________________________________________________________________________________________________
-//''''''''''''''''''''''''''''''''''''''''''''''''''''''''''''''''''''''''''''''''[ACTION FUNCTION]
-void CreateZigUpOrDownArray(int & zigUpOrDownArrayGLOOUT[])
-{
-   ArrayResize(zigUpOrDownArrayGLOOUT,ArraySize(zigZagPeakIDGLO));
-   int insertTrue=0;
-   int insertFalse=1;
-   for(int i=0;i<ArraySize(zigUpOrDownArrayGLOOUT);i++)//iLoopzigUpOrDownArrayGLOOUT
-   {
-      if(is0PeakUpGLO==true)
-      {
-         if(insertTrue==0){insertTrue=1;}
-         else{insertTrue=0;}
-         zigUpOrDownArrayGLOOUT[i]=insertTrue;
-      }
-      else
-      {
-         if(insertFalse==1){insertFalse=0;}
-         else{insertFalse=1;}
-         zigUpOrDownArrayGLOOUT[i]=insertFalse;
-      }
-   }
-}
-//_________________________________________________________________________________________________
-//''''''''''''''''''''''''''''''''''''''''''''''''''''''''''''''''''''''''''''''''[ACTION FUNCTION]
-void CreateZigRangeArrayPSGOUT(string & zigRangeArrayPSGOUT[])
-{
-   for(int i=0;i<ArraySize(zigZagPeakArrayGLO);i++)//iLoopzigZagPeakArrayGLO
-   {
-      if(i!=ArraySize(zigZagPeakArrayGLO)-1)
-      {
-         double iCurrZigPrice=zigZagPeakArrayGLO[i];
-         double iPrevZigPrice=zigZagPeakArrayGLO[i+1];
-         
-      }
-   }
-}
-//_________________________________________________________________________________________________
-//''''''''''''''''''''''''''''''''''''''''''''''''''''''''''''''''''''''''''''''[PROVIDER FUNCTION]
-string ProvideZigZagID(int gradientChunk)
-{
-   return
-   (
-      "<"+
-      DoubleToStr(priceLevel)+","+
-      IntegerToString(gradientChunk)+","+
-      IntegerToString(barOfObject)+
-      ">"
-   );
-}
-//_________________________________________________________________________________________________
-//''''''''''''''''''''''''''''''''''''''''''''''''''''''''''''''''''''''''''''''[PROVIDER FUNCTION]
-double ProvidePeakPrice(int shift,int maxBarsBackforZigZagIN) 
-{; 
-   double peakListFromZigZagArray[9999]={0};
-   for(int i=0;i<maxBarsBackforZigZagIN;i++)//iLoopToGetPeakPrice
-   {
-      double currentPeak=iCustom(Symbol(),0,"ZigZag",4,5,3,0,i);
-      if(currentPeak!=EMPTY_VALUE&&currentPeak!=0) 
-      {
-         peakListFromZigZagArray[i]=currentPeak; 
-      }
-      else peakListFromZigZagArray[i]=0; 
-   }
-   return(NormalizeDouble(peakListFromZigZagArray[shift],5));
-}
+//================================================================================================
+//================================================================================================
+//================================================================================================
+//================================================================================================
+//================================================================================================
+//================================================================================================
+
+
+//                           Item Hidden due to copyrighted material
+//                                   COPYRIGHT 2019 Ben Leong 
+
+
+//                           Item Hidden due to copyrighted material
+//                                   COPYRIGHT 2019 Ben Leong 
+
+
+//                           Item Hidden due to copyrighted material
+//                                   COPYRIGHT 2019 Ben Leong 
+
+
+//================================================================================================
+//================================================================================================
+//================================================================================================
+//================================================================================================
+//================================================================================================
+//================================================================================================
 //________________________________________________________________________________________________
 //\\\\\\\\\\\\\\\\\\\\\\\\\\\\\\\\\\\\\\\\\\\\\\CLASS/////////////////////////////////////////////|--- [Perimeter Peaks Generation]
 //""""""""""""""""""""""""""""""""""""""""""""""""""""""""""""""""""""""""""""""""""""""""""""""""'
