@@ -1009,100 +1009,32 @@ void MarketHoursExecution( string & marketHoursArrayPSGOUT[],int & asianMarketDu
                         blankArray,"markhourdebug"
                         );
 }
-//_________________________________________________________________________________________________
-//''''''''''''''''''''''''''''''''''''''''''''''''''''''''''''''''''''''''''''''''[ACTION FUNCTION]
-void CreateAsianDuration(int asianHourStartIN,int asianHourEndIN,int & asianDurationOUT)
-{
-   if(asianHourStartIN<asianHourEndIN){asianDurationOUT=asianHourEndIN-asianHourStartIN;}
-   else{asianDurationOUT=(24-asianHourStartIN)+(asianHourEndIN);}
-}
-//_________________________________________________________________________________________________
-//''''''''''''''''''''''''''''''''''''''''''''''''''''''''''''''''''''''''''''''''[ACTION FUNCTION]
-void CreateMarketTimingArray( datetime lastKnownDateIN,int asianHourStartIN,int asianHourEndIN,
-                              int euroHourStartIN,int euroHourEndIN,int usaHourStartIN,
-                              int usaHourEndIN,string & marketTimingArrayOUT[],int numOfDaysIN)
-{
-   string currYear=IntegerToString(TimeYear(lastKnownDateIN));
-   string currMonth=IntegerToString(TimeMonth(lastKnownDateIN));
-   string currDay=IntegerToString(TimeDay(lastKnownDateIN));
-   //Asian time MUST END on the day itself and begin on the PREVIOUS DAY.
-   string currATimeEnd=currYear+"."+currMonth+"."+currDay+" "+IntegerToString(asianHourEndIN)+":00";
-   string currATimeStart=TimeToStr(StringToTime(currATimeEnd)-(24-asianHourStartIN+asianHourEndIN)*3600);
-   string currETimeStart=currYear+"."+currMonth+"."+currDay+" "+IntegerToString(euroHourStartIN)+":00";
-   string currETimeEnd=currYear+"."+currMonth+"."+currDay+" "+IntegerToString(euroHourEndIN)+":00";
-   string currUTimeStart=currYear+"."+currMonth+"."+currDay+" "+IntegerToString(usaHourStartIN)+":00";
-   string currUTimeEnd=currYear+"."+currMonth+"."+currDay+" "+IntegerToString(usaHourEndIN)+":00";
-   int outCount=0;
-   int weekCount=1;
-   int weekAdder=0;
-   for(int i=0;i<9999;i++)//iLoop9999
-   {
-      datetime iDate=lastKnownDateIN-(i*86400);
-      int iDay=TimeDay(iDate);
-      bool newWeek=false;
-      if(TimeDayOfWeek(iDate)!=6&&TimeDayOfWeek(iDate)!=0)
-      {
-         weekAdder=1;
-         ArrayResize(marketTimingArrayOUT,ArraySize(marketTimingArrayOUT)+1);
-         marketTimingArrayOUT[outCount]=  IntegerToString(iDay)+","+
-                                          IntegerToString(weekCount)+","+
-                                          TimeToStr(StringToTime(currATimeStart)-(i*86400))+","+
-                                          TimeToStr(StringToTime(currATimeEnd)-(i*86400))+","+
-                                          TimeToStr(StringToTime(currETimeStart)-(i*86400))+","+
-                                          TimeToStr(StringToTime(currETimeEnd)-(i*86400))+","+
-                                          TimeToStr(StringToTime(currUTimeStart)-(i*86400))+","+
-                                          TimeToStr(StringToTime(currUTimeEnd)-(i*86400));
-         outCount++;
-         if(outCount>numOfDaysIN){break;}
-      }
-      if(TimeDayOfWeek(iDate)==6||TimeDayOfWeek(iDate)==0){newWeek=true;}
-      if(newWeek==true){weekCount+=weekAdder;weekAdder=0;}
-   }
-}
-//_________________________________________________________________________________________________
-//''''''''''''''''''''''''''''''''''''''''''''''''''''''''''''''''''''''''''''''''[ACTION FUNCTION]
-void CreateMarkTimingObj(  string & marketTimingArrayIN[],color asianColourIN,
-                           color euroColourIN,color usaColourIN)
-{
-   priceLevel=1000;
-   priceLevelP2=0;
-   for(int i=0;i<ArraySize(marketTimingArrayIN);i++)//iLoopmarketTimingArrayIN
-   {
-      string iDay=StringDemux(marketTimingArrayIN[i],0,",");
-      //Asian
-      timeOfTheBar=StringToTime(StringDemux(marketTimingArrayIN[i],2,","));
-      timeOfTheBarP2=StringToTime(StringDemux(marketTimingArrayIN[i],3,","))-3600;
-      NameRect("MarkTime_Asian_Day"+iDay);
-      CreateRect(asianColourIN,true);
-      //Euro
-      timeOfTheBar=StringToTime(StringDemux(marketTimingArrayIN[i],4,","));
-      timeOfTheBarP2=StringToTime(StringDemux(marketTimingArrayIN[i],5,","))-3600;
-      NameRect("MarkTime_Euro_Day"+iDay);
-      CreateRect(euroColourIN,true);
-      //USA
-      timeOfTheBar=StringToTime(StringDemux(marketTimingArrayIN[i],6,","));
-      timeOfTheBarP2=StringToTime(StringDemux(marketTimingArrayIN[i],7,","))-3600;
-      NameRect("MarkTime_USA_Day"+iDay);
-      CreateRect(usaColourIN,true);
-   }
-}
-//_________________________________________________________________________________________________
-//''''''''''''''''''''''''''''''''''''''''''''''''''''''''''''''''''''''''''''''''[ACTION FUNCTION]
-void CreateGapBarObj(string & marketTimingArray[],color objColour)
-{
-   for(int i=0;i<ArraySize(marketTimingArray);i++)//iLoopmarketTimingArray
-   {
-      priceLevel=1;
-      priceLevelP2=0;
-      datetime iTimeOfBar=StrToTime(StringDemux(marketTimingArray[i],3,","));
-      timeOfTheBar=iTimeOfBar;
-      timeOfTheBarP2=iTimeOfBar;
-      barOfObject=iBarShift(NULL,0,iTimeOfBar,false);
-      barOfObjectP2=barOfObject;
-      NameTLine("GapBar_");
-      CreateTLine(0,1,true,objColour);
-   }
-}
+//================================================================================================
+//================================================================================================
+//================================================================================================
+//================================================================================================
+//================================================================================================
+//================================================================================================
+
+
+//                           Item Hidden due to copyrighted material
+//                                   COPYRIGHT 2019 Ben Leong 
+
+
+//                           Item Hidden due to copyrighted material
+//                                   COPYRIGHT 2019 Ben Leong 
+
+
+//                           Item Hidden due to copyrighted material
+//                                   COPYRIGHT 2019 Ben Leong 
+
+
+//================================================================================================
+//================================================================================================
+//================================================================================================
+//================================================================================================
+//================================================================================================
+//================================================================================================
 //________________________________________________________________________________________________
 //\\\\\\\\\\\\\\\\\\\\\\\\\\\\\\\\\\\\\\\\\\\\\\CLASS/////////////////////////////////////////////|--- [Asian Market Analysis]
 //""""""""""""""""""""""""""""""""""""""""""""""""""""""""""""""""""""""""""""""""""""""""""""""""'
