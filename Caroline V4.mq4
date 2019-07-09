@@ -2,7 +2,7 @@
 //================================================================================================|
 //==========================================INTRODUCTION==========================================|
 //"""""""""""""""""""""""""""""""""""""""""""""""""""""""""""""""""""""""""""""""""""[CHAPTER ONE]'
-//Title: Caroline V4.0
+//Title: CAROLINE V4
 //AUTHOR: BEN LEONG
 //==========================================INSTRUCTION===========================================|
 //Functions are arranged by a simple parent-child relationship. For example, PAGE 1 holds PAGE 2 
@@ -11,8 +11,8 @@
 //loosely to fit in the concept of OOP to make the code more maintainable. 
 //================================================================================================|
 #property copyright "Ben Leong 2019"
-#property link      "https://www.mql5.com"
-#property version   "4.00"
+#property link      "https://www.facebook.com/leongfinance/"
+#property version   "4.10"
 #property strict
 //________________________________________________________________________________________________
 //[=][=][=][=][=][=][=][=][=][=][=][=][=][=][=][=][=][=][=][=][=][=][=][=][=][=][=][=][=][=][=][=]|
@@ -59,7 +59,14 @@ int deinit()
 //""""""""""""""""""""""""""""""""""""""""""""""""""""""""""""""""""""""""""""""""""[x][x][PAGE 2]'
 void StartInitiation()
 {
+   //______________________________________________________________________________________________
+   //'''''''''''''''''''''''''''''''''''''''''''''''''''''''''''''''''''''''''''''''[PSEUDOGLOBALS]
+   //================================================================[VARIABLES]
+   bool bV1;//isChartOfflinePSGOUT
+   //______________________________________________________________________________________________
+   //''''''''''''''''''''''''''''''''''''''''''''''''''''''''''''''''''''''''''''''''''''''[EVENTS]
    FetchBrokerInformation();
+   ChartPropExecution(bV1);
 }
 //________________________________________________________________________________________________
 //''''''''''''''''''''''''''''''''''''''''''''''''''''''''''''''''''''''''''''''''''''''''''''''''
@@ -82,7 +89,7 @@ string nameOfEACompact;
 //'''''''''''''''''''''''''''''''''''''''''''''''''''''''''''''''''''''''''''[CONSTRUCTOR FUNCTION]
 void InitializeEA()
 {
-   nameOfEA="Caroline EA";
+   nameOfEA="Caroline";
    nameOfEACompact=nameOfEA;
    StringReplace(nameOfEACompact," ","");
 }
@@ -92,15 +99,18 @@ void CreateCommentModule()
 {
    Comment
    (
-      nameOfEA+" Version 2.1"+
+      nameOfEA+" Version 4.1"+
       "\n"+"Chart Timeframe: "+DoubleToStr(Period(),0)+" minutes/bar."+
       "\n"+"Currency pair: "+Symbol()+
       "\n"+"One Micropip Equals: "+DoubleToStr(microPips,5)+
       "\n"+"Time: "+TimeToStr(Time[0])+
       "\n"+"Ask Price: "+DoubleToStr(Ask,5)+", Bid Price: "+DoubleToStr(Bid,5)+" and Spread:"+DoubleToStr((Ask-Bid)/microPips,2)+" Micropips"+
-      "\n"+"File write status: "+fileHandleStatus
+      "\n"+"MT4 File Write status: "+fileHandleStatus+
+      "\n"+"MT4 File Read status: "+"NIL."+
+      "\n"+"Python Module status: "+"Not Loaded."+
+      "\n"+"Deep Learning Feedback status: "+"In Progress."
    );
-} 
+}
 //________________________________________________________________________________________________
 //\\\\\\\\\\\\\\\\\\\\\\\\\\\\\\\\\\\\\\\\\\\\\\CLASS/////////////////////////////////////////////|--- [Broker Information]
 //""""""""""""""""""""""""""""""""""""""""""""""""""""""""""""""""""""""""""""""""""""""""""""""""'
@@ -113,7 +123,7 @@ double tickSize;
 void FetchBrokerInformation()
 {
    FetchMicropip();
-   microPipM100=microPips*100;
+   microPipM100GLO=microPips*100;
 }
 //_________________________________________________________________________________________________
 //''''''''''''''''''''''''''''''''''''''''''''''''''''''''''''''''''''''''''''''''[ACTION FUNCTION]
@@ -129,6 +139,44 @@ void FetchMicropip()
 void FetchTickSize()
 {
    tickSize=MarketInfo(Symbol(),MODE_TICKSIZE);
+}
+//________________________________________________________________________________________________
+//\\\\\\\\\\\\\\\\\\\\\\\\\\\\\\\\\\\\\\\\\\\\\\CLASS/////////////////////////////////////////////|--- [Set Chart Properties]
+//""""""""""""""""""""""""""""""""""""""""""""""""""""""""""""""""""""""""""""""""""""""""""""""""'
+//_________________________________________________________________________________________________
+//''''''''''''''''''''''''''''''''''''''''''''''''''''''''''''''''''''''''''''''''''''''[EXECUTION]
+void ChartPropExecution(bool & isChartOfflinePSGOUT)
+{
+   //______________________________________________________________________________________________
+   //''''''''''''''''''''''''''''''''''''''''''''''''''''''''''''''''''''''''''''''''''[PARAMETERS]
+   //================================================================[VARIABLES]
+   bool bV1;//showGrid
+   bool bV2;//isChartOffline
+   color cV1;//chartBGColour
+   //================================================================[ARRAYS]
+   //______________________________________________________________________________________________
+   //'''''''''''''''''''''''''''''''''''''''''''''''''''''''''''''''''''''''''''''''''''''[METHODS]
+   //================================================================[SETTER]
+   bV1=false;
+   cV1=C'0,19,22';
+   //================================================================[EVENTS]
+   SetChartParam(cV1,bV1);
+   GetChartParam(bV2);
+   //================================================================[PSGOUTPUT]
+   isChartOfflinePSGOUT=bV2;
+}
+//_________________________________________________________________________________________________
+//''''''''''''''''''''''''''''''''''''''''''''''''''''''''''''''''''''''''''''''''[ACTION FUNCTION]
+void SetChartParam(color chartBGColourIN,bool showGridIN)
+{
+   ChartSetInteger(0,CHART_COLOR_BACKGROUND,chartBGColourIN);
+   ChartSetInteger(0,CHART_SHOW_GRID,showGridIN);
+}
+//_________________________________________________________________________________________________
+//''''''''''''''''''''''''''''''''''''''''''''''''''''''''''''''''''''''''''''''''[ACTION FUNCTION]
+void GetChartParam(bool & isChartOfflineIN)
+{
+   isChartOfflineIN=ChartGetInteger(0,CHART_IS_OFFLINE);
 }
 //________________________________________________________________________________________________
 //================================================================================================|--- Always begins with Provide. 
@@ -216,9 +264,21 @@ void StartMainExecution()
    //______________________________________________________________________________________________
    //'''''''''''''''''''''''''''''''''''''''''''''''''''''''''''''''''''''''''''''''[PSEUDOGLOBALS]
    //================================================================[VARIABLES]
+   int iV1;//maxBarsToAnalysePSG
+   int iV2;//asianMarketDurPSG
+   int iV3;//averageZigZagBarsPSG
+   bool bV1;//enableAllObjPSG
    //================================================================[ARRAYS]
-   string mainTrendsArrayPSG[];
-   string mainTrendsIDArrayPSG[];
+   string sA1[];//mainTrendsArrayPSG
+   string sA2[];//mainTrendsIDArrayPSG
+   string sA3[];//stochXExArrayPSG
+   string sA4[];//marketHoursArrayPSG
+   string sA5[];//zigRangeArrayPSG
+   double dA1[];//psyPricesArrayPSG
+   //______________________________________________________________________________________________
+   //'''''''''''''''''''''''''''''''''''''''''''''''''''''''''''''''''''''''''[PSEUDOGLOBALSETTERS]
+   iV1=1000;
+   bV1=true;
    //______________________________________________________________________________________________
    //'''''''''''''''''''''''''''''''''''''''''''''''''''''''''''''''''''''''''''''''[GLOBALSETTERS]
    globalDelimiterGLO=CharToStr(166);
@@ -228,17 +288,18 @@ void StartMainExecution()
    //______________________________________________________________________________________________
    //''''''''''''''''''''''''''''''''''''''''''''''''''''''''''''''''''''''''''''''''''''''[EVENTS]
    StartChartObj();
-   StartPsyExecution();
-   StartZigZagExecution();
-   StartPeriPeakExecution();
-   StartFiboProjExecution();
-   StartStochXExecution();
-   
-   MainTrendsExecution( mainTrendsArrayPSG,mainTrendsIDArrayPSG);
-   FuturePointExecution(mainTrendsArrayPSG,mainTrendsIDArrayPSG);
-   
-   StartMidTrendsExecution();
-   StartProxChannelsExecution();
+   PsyExecution(iV1,dA1,bV1);
+   ZigZagExecution(iV1,iV3,bV1,sA5);
+   PeriPeakExecution(bV1);
+   MarketHoursExecution(sA4,iV2,iV1,bV1);
+   AsianAnalyticsExecution(sA4,iV1,iV2,dA1,bV1);
+   BollingerBandExecution(sA4,bV1);
+   //StartFiboProjExecution();
+   StochXExecution(iV1,sA3,bV1);
+   StochDivExecution(iV1,sA3,bV1);
+   MainTrendsExecution(sA1,sA2,iV3);
+   //StartMidTrendsExecution();
+   //StartProxChannelsExecution();
    //StartBuySellObjExecution();
 }
 //_________________________________________________________________________________________________
@@ -246,35 +307,7 @@ void StartMainExecution()
 void StartChartObj()
 {
    InitializeChartObj("Verdana");
-}
-//_________________________________________________________________________________________________
-//''''''''''''''''''''''''''''''''''''''''''''''''''''''''''''''''''''''''''''''[UMBRELLA FUNCTION]
-void StartPsyExecution()
-{  
-   SetPsyParameters(1);
-   SetPsyChartObjectParameters(clrPink);
-   UpdateLastAskCeiling();
-   ResizePsyArrays();
-   CreatePsyLevelHLines();
-   CreateLineRanker();
-}
-//_________________________________________________________________________________________________
-//''''''''''''''''''''''''''''''''''''''''''''''''''''''''''''''''''''''''''''''[UMBRELLA FUNCTION]
-void StartZigZagExecution()
-{
-   InitializeZigZag();
-   SetZigZagParameters(100,1000);
-   SetZigZagChartObjectParameters(clrBlack);
-   CreateZigZagPeakSArrow();
-   CreateZigZagBars();
-   CreateMaxZigZagBar();
-   CreatePeakUpOrDown(is0PeakUpOrDown);
-}
-//_________________________________________________________________________________________________
-//''''''''''''''''''''''''''''''''''''''''''''''''''''''''''''''''''''''''''''''[UMBRELLA FUNCTION]
-void StartPeriPeakExecution()
-{
-   PeriPeakExecution();
+   CreateCopyrightDisplay();
 }
 //_________________________________________________________________________________________________
 //''''''''''''''''''''''''''''''''''''''''''''''''''''''''''''''''''''''''''''''[UMBRELLA FUNCTION]
@@ -300,17 +333,6 @@ void StartFiboProjExecution()
    GenerateFiboExtension();
    SetFiboProjObjParam(clrTeal);
    CreateFiboExtensionObjects();
-}
-//_________________________________________________________________________________________________
-//''''''''''''''''''''''''''''''''''''''''''''''''''''''''''''''''''''''''''''''[UMBRELLA FUNCTION]
-void StartStochXExecution()
-{
-   InitializeStochX();
-   SetStochXParam(5,3,2000,60,83);
-   SetStochXObjParam(clrBlue,clrMagenta);
-   CreateStochXArray();
-   CompareMainAndSignalStochXArrays();
-   CreateStochXEMAArray();
 }
 //_________________________________________________________________________________________________
 //''''''''''''''''''''''''''''''''''''''''''''''''''''''''''''''''''''''''''''''[UMBRELLA FUNCTION]
@@ -348,15 +370,7 @@ void StartProxChannelsExecution()
 //}
 //_________________________________________________________________________________________________
 //''''''''''''''''''''''''''''''''''''''''''''''''''''''''''''''''''''''''''''''[UMBRELLA FUNCTION]
-void StartCSVOutputGenerator()
-{
-   InitializeCSVOutputGenerator();
-   CreateRowCounter(maxZigZagBar);
-   SizeAllCSVArraysToEqualLength(ArraySize(barsArray));
-   GenerateCSVOutputArrays();
-   TransferAllCSVArraysToTemp();
-   CreateCSVFileOutput("data",nameOfEACompact);
-}
+
 //_________________________________________________________________________________________________
 //''''''''''''''''''''''''''''''''''''''''''''''''''''''''''''''''''''''''''''''[UMBRELLA FUNCTION]
 void StartCleanupAndDebugging()
@@ -378,7 +392,6 @@ void StartCleanupAndDebugging()
 //''''''''''''''''''''''''''''''''''''''''''''''''''''''''''''''''''''''''''''''[UMBRELLA FUNCTION]
 void StartPostExecution()
 {  
-   StartCSVOutputGenerator();
    StartCleanupAndDebugging();
 }
 //_________________________________________________________________________________________________
@@ -409,7 +422,12 @@ datetime timeOfTheBar;
 datetime timeOfTheBarP2;
 datetime timeOfTheBarP3;
 string chartFont;
+int sArrowNum;
 int textBoxNum;
+int rectNum;
+int tLineNum;
+int vLineNum;
+int hLineNum;
 //_________________________________________________________________________________________________
 //''''''''''''''''''''''''''''''''''''''''''''''''''''''''''''''''''''''''''''''''[ACTION FUNCTION]
 void InitializeChartObj(string fontOfChart)
@@ -417,28 +435,38 @@ void InitializeChartObj(string fontOfChart)
    objectNameMainIdentifier=nameOfEACompact+"_";
    chartFont=fontOfChart;
    textBoxNum=0;
+   rectNum=0;
+   tLineNum=0;
+   vLineNum=0;
+   hLineNum=0;
+   sArrowNum=0;
 }
 //_________________________________________________________________________________________________
 //''''''''''''''''''''''''''''''''''''''''''''''''''''''''''''''''''''''''''''''''[ACTION FUNCTION]
 void NameHLine(string AdditionalIdentifier)
 {
-   objectName=objectNameMainIdentifier+"HLine_"+AdditionalIdentifier+"<"+DoubleToStr(priceLevel,4)+">";
+   objectName=objectNameMainIdentifier+"HLine_"+AdditionalIdentifier+"<"+IntegerToString(hLineNum)+">";
 }
 //_________________________________________________________________________________________________
 //''''''''''''''''''''''''''''''''''''''''''''''''''''''''''''''''''''''''''''''''[ACTION FUNCTION]
-void CreateHLine()
+void CreateHLine(int width, int style, int ray,color objColor)
 {
-   ObjectCreate(objectName,OBJ_HLINE,0,0,priceLevel);
-   ObjectSet(objectName,OBJPROP_COLOR,colorOfObject);
-   ObjectSet(objectName,OBJPROP_WIDTH,0);
-   ObjectSet(objectName,OBJPROP_STYLE,2);
+   ObjectCreate(objectName,OBJ_TREND,0,timeOfTheBarP2,priceLevelP2,timeOfTheBar,priceLevel);
+   ObjectSet(objectName,OBJPROP_COLOR,objColor);
+   ObjectSet(objectName,OBJPROP_WIDTH,width);
+   ObjectSet(objectName,OBJPROP_STYLE,style);
+   ObjectSet(objectName,OBJPROP_RAY,ray);
    ObjectSet(objectName,OBJPROP_SELECTABLE,0);
+   ObjectSet(objectName,OBJPROP_HIDDEN,true);
+   hLineNum++;
 }
 //_________________________________________________________________________________________________
 //''''''''''''''''''''''''''''''''''''''''''''''''''''''''''''''''''''''''''''''[PROVIDER FUNCTION]
 string ProvideSmallArrowID()
 {
-   return("<"+DoubleToStr(priceLevel,4)+","+IntegerToString(barOfObject)+">");
+   return("<"+ DoubleToStr(priceLevel,4)+","+
+               IntegerToString(barOfObject)+","+
+               IntegerToString(sArrowNum)+">");
 }
 //_________________________________________________________________________________________________
 //''''''''''''''''''''''''''''''''''''''''''''''''''''''''''''''''''''''''''''''''[ACTION FUNCTION]
@@ -449,11 +477,16 @@ void NameSmallArrow(string AdditionalIdentifier)
 }
 //_________________________________________________________________________________________________
 //''''''''''''''''''''''''''''''''''''''''''''''''''''''''''''''''''''''''''''''''[ACTION FUNCTION]
-void CreateSArrow()
+void CreateSArrow(int arrowCode, int arrowSize,int anchor)
 {
-   ObjectCreate(objectName,OBJ_ARROW_BUY,0,timeOfTheBar,priceLevel);
+   ObjectCreate(objectName,OBJ_ARROW_STOP,0,timeOfTheBar,priceLevel);
+   ObjectSetInteger(0,objectName,OBJPROP_ARROWCODE,arrowCode);
    ObjectSet(objectName,OBJPROP_COLOR,colorOfObject);
+   ObjectSet(objectName,OBJPROP_WIDTH,arrowSize);
+   ObjectSet(objectName,OBJPROP_ANCHOR,anchor);
    ObjectSet(objectName,OBJPROP_SELECTABLE,0);
+   ObjectSet(objectName,OBJPROP_HIDDEN,true);
+   sArrowNum++;
 }
 //_________________________________________________________________________________________________
 //''''''''''''''''''''''''''''''''''''''''''''''''''''''''''''''''''''''''''''''''[ACTION FUNCTION]
@@ -463,19 +496,43 @@ void NameTLine(string AdditionalIdentifier)
                                                                            DoubleToStr(priceLevel,4)+","+
                                                                            IntegerToString(barOfObject)+","+
                                                                            DoubleToStr(priceLevelP2,4)+","+
-                                                                           IntegerToString(barOfObjectP2)+
+                                                                           IntegerToString(barOfObjectP2)+","+
+                                                                           IntegerToString(tLineNum)+
                                                                      ">";
 }
 //_________________________________________________________________________________________________
 //''''''''''''''''''''''''''''''''''''''''''''''''''''''''''''''''''''''''''''''''[ACTION FUNCTION]
-void CreateTLine(int solidness,int width)
+void CreateTLine(int solidness,int width,int ray,color colour)
 {
    ObjectCreate(objectName,OBJ_CHANNEL,0,timeOfTheBarP2,priceLevelP2,timeOfTheBar,priceLevel);
-   ObjectSet(objectName,OBJPROP_COLOR,colorOfObject);
+   ObjectSet(objectName,OBJPROP_COLOR,colour);
    ObjectSet(objectName,OBJPROP_WIDTH,width);
    ObjectSet(objectName,OBJPROP_STYLE,solidness);
-   ObjectSet(objectName,OBJPROP_RAY,1);
+   ObjectSet(objectName,OBJPROP_RAY,ray);
    ObjectSet(objectName,OBJPROP_SELECTABLE,0);
+   ObjectSet(objectName,OBJPROP_HIDDEN,true);
+   tLineNum++;
+}
+//_________________________________________________________________________________________________
+//''''''''''''''''''''''''''''''''''''''''''''''''''''''''''''''''''''''''''''''''[ACTION FUNCTION]
+void NameVLine(string AdditionalIdentifier)
+{
+   objectName=objectNameMainIdentifier+"VLine_"+AdditionalIdentifier+"<"+
+                                                                           IntegerToString(barOfObject)+","+
+                                                                           IntegerToString(vLineNum)+
+                                                                     ">";
+}
+//_________________________________________________________________________________________________
+//''''''''''''''''''''''''''''''''''''''''''''''''''''''''''''''''''''''''''''''''[ACTION FUNCTION]
+void CreateVLine(int solidness,int width,color colour)
+{
+   ObjectCreate(objectName,OBJ_VLINE,0,timeOfTheBar,0);
+   ObjectSet(objectName,OBJPROP_COLOR,colour);
+   ObjectSet(objectName,OBJPROP_WIDTH,width);
+   ObjectSet(objectName,OBJPROP_STYLE,solidness);
+   ObjectSet(objectName,OBJPROP_SELECTABLE,0);
+   ObjectSet(objectName,OBJPROP_HIDDEN,true);
+   vLineNum++;
 }
 //_________________________________________________________________________________________________
 //''''''''''''''''''''''''''''''''''''''''''''''''''''''''''''''''''''''''''''''''[ACTION FUNCTION]
@@ -499,6 +556,7 @@ void CreateChLine(int solidness,int width)
    ObjectSet(objectName,OBJPROP_STYLE,solidness);
    ObjectSet(objectName,OBJPROP_RAY,0);
    ObjectSet(objectName,OBJPROP_SELECTABLE,0);
+   ObjectSet(objectName,OBJPROP_HIDDEN,true);
 }
 //_________________________________________________________________________________________________
 //''''''''''''''''''''''''''''''''''''''''''''''''''''''''''''''''''''''''''''''''[ACTION FUNCTION]
@@ -510,177 +568,412 @@ void NameTextBox(string AdditionalIdentifier)
 }
 //_________________________________________________________________________________________________
 //''''''''''''''''''''''''''''''''''''''''''''''''''''''''''''''''''''''''''''''''[ACTION FUNCTION]
-void CreateTextBox(string text,int fontSize,color fontColor)
+void CreateTextBox(string text,int fontSize,color fontColor,int anchor)
 {
    ObjectCreate(objectName,OBJ_TEXT,0,timeOfTheBar,priceLevel);
    ObjectSetText(objectName,text,fontSize,chartFont,fontColor);
-   ObjectSet(objectName,OBJPROP_ALIGN,1);
-   
+   ObjectSet(objectName,OBJPROP_HIDDEN,true);
+   ObjectSet(objectName,OBJPROP_ANCHOR,anchor);
    textBoxNum++;
+}
+//_________________________________________________________________________________________________
+//''''''''''''''''''''''''''''''''''''''''''''''''''''''''''''''''''''''''''''''''[ACTION FUNCTION]
+void NameRect(string additionalIdentifier)
+{
+   objectName=objectNameMainIdentifier+"TextBox_"+additionalIdentifier+ "<"+
+                                                                           "ID: "+IntegerToString(rectNum)+
+                                                                        ">";
+}
+//_________________________________________________________________________________________________
+//''''''''''''''''''''''''''''''''''''''''''''''''''''''''''''''''''''''''''''''''[ACTION FUNCTION]
+void CreateRect(color colour,bool isBack)
+{
+   ObjectCreate(objectName,OBJ_RECTANGLE,0,timeOfTheBarP2,priceLevelP2,timeOfTheBar,priceLevel);
+   ObjectSet(objectName,OBJPROP_COLOR,colour);
+   ObjectSet(objectName,OBJPROP_BACK,isBack);
+   ObjectSet(objectName,OBJPROP_SELECTABLE,0);
+   ObjectSet(objectName,OBJPROP_HIDDEN,true);
+   rectNum++;
+
+}
+//_________________________________________________________________________________________________
+//''''''''''''''''''''''''''''''''''''''''''''''''''''''''''''''''''''''''''''''''[ACTION FUNCTION]
+void CreateStaticLabels(string objName,string font,color colour,string textDisplay,
+                        int corner,int xDist,int yDist,int fontSize)
+{
+   ObjectCreate(objName,OBJ_LABEL,0,0,0);
+   ObjectSetText(objName,textDisplay,fontSize,font,colour);
+   ObjectSet(objName,OBJPROP_CORNER,corner);
+   ObjectSet(objName,OBJPROP_XDISTANCE,xDist);
+   ObjectSet(objName,OBJPROP_YDISTANCE,yDist);
+}
+//_________________________________________________________________________________________________
+//''''''''''''''''''''''''''''''''''''''''''''''''''''''''''''''''''''''''''''''''[ACTION FUNCTION]
+void CreateCopyrightDisplay()
+{
+   string textToEnter;
+   string EAObjName;
+   color copyrightColour=clrLightSeaGreen;
+   string copyrightSym=CharToStr(169);
+   //EA Name
+   EAObjName=objectNameMainIdentifier+"EA_Title";
+   textToEnter=nameOfEA;
+   CreateStaticLabels(EAObjName,"Verdana",copyrightColour,textToEnter,3,20,50,12);
+   //Description of EA
+   EAObjName=objectNameMainIdentifier+"EA_Desc";
+   textToEnter="A MT4 EURUSD 1H Black Box Algorithm";
+   CreateStaticLabels(EAObjName,"Verdana",copyrightColour,textToEnter,3,20,40,6);
+   //Copyright
+   EAObjName=objectNameMainIdentifier+"Copyright";
+   textToEnter="Copyright "+copyrightSym+" 2019, Ben Leong, All Rights Reserved.";
+   CreateStaticLabels(EAObjName,"Verdana",copyrightColour,textToEnter,3,20,30,6);
+   //Website
+   EAObjName=objectNameMainIdentifier+"Website";
+   textToEnter="www.leongfinance.com";
+   CreateStaticLabels(EAObjName,"Verdana",copyrightColour,textToEnter,3,20,20,6);
 }
 //________________________________________________________________________________________________
 //\\\\\\\\\\\\\\\\\\\\\\\\\\\\\\\\\\\\\\\\\\\\\\CLASS/////////////////////////////////////////////|--- [Psy Level Generation]
 //""""""""""""""""""""""""""""""""""""""""""""""""""""""""""""""""""""""""""""""""""""""""""""""""'
 //_________________________________________________________________________________________________
-//''''''''''''''''''''''''''''''''''''''''''''''''''''''''''''''''''''''''''''''''''''''[VARIABLES]
-double microPipM100;
-double lastAskCeiling;
-int numberOfPsyLevels;
-double psyUpPrices[];
-double psyDownPrices[];
-double psyUpRanks[];
-double psyDownRanks[];
+//''''''''''''''''''''''''''''''''''''''''''''''''''''''''''''''''''''''''''''''''''''''''[GLOBALS]
+double microPipM100GLO;
 //_________________________________________________________________________________________________
-//''''''''''''''''''''''''''''''''''''''''''''''''''''''''''''''''''''''''''''''''[ACTION FUNCTION]
-void SetPsyParameters(int numberOfLevels)
+//''''''''''''''''''''''''''''''''''''''''''''''''''''''''''''''''''''''''''''''''''''''[EXECUTION]
+void PsyExecution(int maxBarsToAnalysePSGIN,double & psyPricesArrayPSGOUT[],bool enableAllObjPSGIN)
 {
-   numberOfPsyLevels=numberOfLevels;
-}
-//_________________________________________________________________________________________________
-//''''''''''''''''''''''''''''''''''''''''''''''''''''''''''''''''''''''''''''''''[ACTION FUNCTION]
-void SetPsyChartObjectParameters(color colour)
-{
-   colorOfObject=colour;
-}
-//_________________________________________________________________________________________________
-//''''''''''''''''''''''''''''''''''''''''''''''''''''''''''''''''''''''''''''''''[ACTION FUNCTION]
-void UpdateLastAskCeiling()
-{
-   lastAskCeiling=MathCeil(Ask/microPipM100)*microPipM100;
-}
-//_________________________________________________________________________________________________
-//''''''''''''''''''''''''''''''''''''''''''''''''''''''''''''''''''''''''''''''''[ACTION FUNCTION]
-void ResizePsyArrays()
-{
-   ArrayResize(psyUpPrices,numberOfPsyLevels);
-   ArrayResize(psyDownPrices,numberOfPsyLevels);
-   ArrayResize(psyUpRanks,numberOfPsyLevels);
-   ArrayResize(psyDownRanks,numberOfPsyLevels);
-}
-//_________________________________________________________________________________________________
-//''''''''''''''''''''''''''''''''''''''''''''''''''''''''''''''''''''''''''''''''[ACTION FUNCTION]
-void CreatePsyLevelHLines()
-{
-   double psyUpper1=lastAskCeiling;
-   double psyLower1=psyUpper1-microPipM100;
-   for(int i=0;i<numberOfPsyLevels;i++)//Line creation.
+   //______________________________________________________________________________________________
+   //''''''''''''''''''''''''''''''''''''''''''''''''''''''''''''''''''''''''''''''''''[PARAMETERS]
+   //================================================================[VARIABLES]
+   int iV1;//numberOfPsyObj
+   int iV2;//numOfPsyLevels
+   int iV3;//maxBarsToAnalysePSGIN
+   color cV1;//psyObjColour
+   double dV1;//lastAskCeiling
+   bool bV1;//enableAllObjPSGIN
+   //================================================================[ARRAYS]
+   double dA1[];//psyUpPrices
+   double dA2[];//psyDownPrices
+   double dA3[];//psyPricesArrayPSGOUT
+   //______________________________________________________________________________________________
+   //'''''''''''''''''''''''''''''''''''''''''''''''''''''''''''''''''''''''''''''''''''''[METHODS]
+   //================================================================[INITIATEARRAYS]
+   //================================================================[SETTER]
+   iV1=10;
+   iV2=100;
+   iV3=maxBarsToAnalysePSGIN;
+   cV1=clrTeal;
+   bV1=enableAllObjPSGIN;
+   //================================================================[EVENTS]
+   UpdateLastAskCeiling(dV1);
+   ResizePsyArrays(dA1,dA2,iV1);
+   if(bV1==true){CreatePsyHLineObj(cV1,dV1,iV1);}
+   CreatePsyPricesArray(dA3,dV1,iV3);
+   //================================================================[GLOBALCONVERTER]
+   ArrayCopy(psyPricesArrayPSGOUT,dA3,0,0,WHOLE_ARRAY);
+   //================================================================[DEBUG]
+   string blankArray[];
+   ArrayResize(blankArray,ArraySize(dA3));
+   for(int i=0;i<ArraySize(dA3);i++)
    {
-      priceLevel=psyUpper1+i*microPipM100;
+      blankArray[i]=DoubleToStr(dA3[i]);
+   }
+   CSVCreationHijacker( blankArray,blankArray,
+                        blankArray,blankArray,
+                        blankArray,"psyDebug"
+                        );
+}
+//_________________________________________________________________________________________________
+//''''''''''''''''''''''''''''''''''''''''''''''''''''''''''''''''''''''''''''''''[ACTION FUNCTION]
+void UpdateLastAskCeiling(double & lastAskCeilingOUT)
+{
+   lastAskCeilingOUT=MathCeil(Ask/microPipM100GLO)*microPipM100GLO;
+}
+//_________________________________________________________________________________________________
+//''''''''''''''''''''''''''''''''''''''''''''''''''''''''''''''''''''''''''''''''[ACTION FUNCTION]
+void ResizePsyArrays(double & psyUpPricesOUT[],double & psyDownPricesOUT[],int numberOfPsyLevelsIN)
+{
+   ArrayResize(psyUpPricesOUT,numberOfPsyLevelsIN);
+   ArrayResize(psyDownPricesOUT,numberOfPsyLevelsIN);
+}
+//_________________________________________________________________________________________________
+//''''''''''''''''''''''''''''''''''''''''''''''''''''''''''''''''''''''''''''''''[ACTION FUNCTION]
+void CreatePsyHLineObj(color psyObjColourIN,double lastAskCeilingIN,int numberOfPsyObjIN)
+{
+   colorOfObject=psyObjColourIN;
+   double psyUpper1=lastAskCeilingIN;
+   double psyLower1=psyUpper1-microPipM100GLO;
+   ProvideBarToTimeConversion(0);
+   timeOfTheBarP2=ProvideBarToTimeConversionUniversal(-1);;
+   double item100=microPips/microPipM100GLO;
+   for(int i=0;i<numberOfPsyObjIN;i++)//Line creation.
+   {   
+      //Up
+      priceLevelP2=psyUpper1+i*microPipM100GLO;
+      priceLevel=priceLevelP2;
       NameHLine("Psy_");
-      CreateHLine();
-      priceLevel=psyLower1-i*microPipM100;
+      if(MathMod(priceLevelP2,item100)<0.0001){CreateHLine(1,4,1,clrLightSeaGreen);}
+      else{CreateHLine(1,2,1,clrTeal);}
+      //Down
+      priceLevelP2=psyLower1-i*microPipM100GLO;
+      priceLevel=priceLevelP2;
       NameHLine("Psy_");
-      CreateHLine();
+      if(MathMod(priceLevelP2,item100)<0.0001){CreateHLine(1,4,1,clrLightSeaGreen);}
+      else{CreateHLine(1,2,1,clrTeal);}
    }
 }
 //_________________________________________________________________________________________________
 //''''''''''''''''''''''''''''''''''''''''''''''''''''''''''''''''''''''''''''''''[ACTION FUNCTION]
-void CreateLineRanker()
+void CreatePsyPricesArray( double & psyPricesArrayPSGOUT[],double lastAskCeilingIN,
+                           int maxBarsToAnalysePSGIN)
 {
-   for(int i=0;i<ArraySize(psyUpPrices);i++)//iLoopRankEachValueOfPsyArrays
+   double minValue=Low[iLowest(NULL,0,MODE_LOW,maxBarsToAnalysePSGIN,0)];
+   double minValueCeil=MathCeil(minValue/microPipM100GLO)*microPipM100GLO;
+   minValueCeil=minValueCeil-microPipM100GLO*2;//Add a slight buffer to the edges.
+   double maxValue=High[iHighest(NULL,0,MODE_HIGH,maxBarsToAnalysePSGIN,0)];
+   double maxValueCeil=MathCeil(maxValue/microPipM100GLO)*microPipM100GLO;
+   maxValueCeil=maxValueCeil+microPipM100GLO*2;//Add a slight buffer to the edges.
+   for(int i=0;i<9999;i++)//iLoop9999
    {
-      psyUpPrices[i]=lastAskCeiling+i*microPipM100;
-      //CRUCIAL this is i+1 because simply i will start at the PsyUpper1. 
-      psyDownPrices[i]=lastAskCeiling-(i+1)*microPipM100;
-      if(MathMod(psyUpPrices[i]/microPips,1000)==0)psyUpRanks[i]=2; 
-      else psyUpRanks[i]=1;
-      if(MathMod(psyDownPrices[i]/microPips,1000)==0)psyDownRanks[i]=2;    
-      else psyDownRanks[i]=1;
+      double iPsyPrice=minValueCeil+microPipM100GLO*i;
+      if(iPsyPrice>maxValueCeil){break;}
+      ArrayResize(psyPricesArrayPSGOUT,ArraySize(psyPricesArrayPSGOUT)+1);
+      psyPricesArrayPSGOUT[i]=iPsyPrice;
    }
 }
 //________________________________________________________________________________________________
 //\\\\\\\\\\\\\\\\\\\\\\\\\\\\\\\\\\\\\\\\\\\\\\CLASS/////////////////////////////////////////////|--- [ZigZag Generation]
 //""""""""""""""""""""""""""""""""""""""""""""""""""""""""""""""""""""""""""""""""""""""""""""""""'
 //_________________________________________________________________________________________________
-//''''''''''''''''''''''''''''''''''''''''''''''''''''''''''''''''''''''''''''''''''''''[VARIABLES]
-double zigZagPeakArray[];
-string zigZagPeakID[];
-int zigZagBarsArray[];
-int maxZigZagBar;
-int averageZigZagBars;
-int maxZigZagPeaksAllowed;
-int maxBarsBackforZigZag;
-bool is0PeakUpOrDown;
+//''''''''''''''''''''''''''''''''''''''''''''''''''''''''''''''''''''''''''''''''''''''''[GLOBALS]
+double zigZagPeakArrayGLO[];
+string zigZagPeakIDGLO[];
+bool is0PeakUpGLO;
+int zigUpOrDownArrayGLO[];
 //_________________________________________________________________________________________________
-//''''''''''''''''''''''''''''''''''''''''''''''''''''''''''''''''''''''''''''''''[ACTION FUNCTION]
-void InitializeZigZag()
+//''''''''''''''''''''''''''''''''''''''''''''''''''''''''''''''''''''''''''''''''''''''[EXECUTION]
+void ZigZagExecution(int maxBarsToAnalysePSGIN,int & averageZigZagBarsPSGOUT,bool enableAllObjPSGIN,
+                     string & zigRangeArrayPSGOUT[])
 {
-   ArrayResize(zigZagPeakArray,0);
-   ArrayResize(zigZagPeakID,0);
-   ArrayResize(zigZagBarsArray,0);
+   //______________________________________________________________________________________________
+   //''''''''''''''''''''''''''''''''''''''''''''''''''''''''''''''''''''''''''''''''''[PARAMETERS]
+   //================================================================[VARIABLES]
+   color cV1;//zigZagObjColour
+   int iV1;//averageZigZagBarsPSG
+   int iV2;//maxBarsBackforZigZag
+   bool bV1;//enableAllObjPSGIN
+   //================================================================[ARRAYS]
+   string sA1[];//zigRangeArrayPSGOUT
+   //______________________________________________________________________________________________
+   //'''''''''''''''''''''''''''''''''''''''''''''''''''''''''''''''''''''''''''''''''''''[METHODS]
+   //================================================================[INITIATEARRAYS]
+   ArrayResize(zigZagPeakArrayGLO,0);
+   ArrayResize(zigZagPeakIDGLO,0);
+   ArrayResize(zigUpOrDownArrayGLO,0);
+   //================================================================[SETTER]
+   cV1=clrYellow;;
+   iV2=maxBarsToAnalysePSGIN;
+   bV1=enableAllObjPSGIN;
+   //================================================================[EVENTS]
+   CreateZigZagPeakArrays(iV2);
+   NormalizeZigZagArrays();
+   CreateZigZagBars(iV1);
+   CreatePeakUpOrDown(is0PeakUpGLO);
+   if(bV1==true){CreateZigZagObj(cV1);}
+   ReevaluateGradientOrigins();
+   if(bV1==true){CreateZigZagTenthLabelObj(cV1);}
+   CreateZigUpOrDownArray(zigUpOrDownArrayGLO);
+   CreateZigRangeArrayPSGOUT(sA1);
+   //================================================================[GLOBALCONVERTER]
+   averageZigZagBarsPSGOUT=iV1;
+   ArrayCopy(zigRangeArrayPSGOUT,sA1,0,0,WHOLE_ARRAY);
+   //================================================================[DEBUG]
+   string blankArray[];
+   ArrayResize(blankArray,ArraySize(zigZagPeakIDGLO));
+   for(int i=0;i<ArraySize(zigZagPeakIDGLO);i++)
+   {
+      blankArray[i]="";
+   }
+   string tootwrw[];
+   ArrayResize(tootwrw,ArraySize(zigZagPeakIDGLO));
+   for(int i=0;i<ArraySize(zigUpOrDownArrayGLO);i++)
+   {
+      tootwrw[i]=IntegerToString(zigUpOrDownArrayGLO[i]);
+   }
+   CSVCreationHijacker( zigZagPeakIDGLO,tootwrw,
+                        blankArray,blankArray,
+                        blankArray,"zigZagdebug"
+                        );
 }
 //_________________________________________________________________________________________________
 //''''''''''''''''''''''''''''''''''''''''''''''''''''''''''''''''''''''''''''''''[ACTION FUNCTION]
-void SetZigZagParameters(int maximumPeaksAllowed,int maximumBarsToAnalyze)
-{
-   maxZigZagPeaksAllowed=maximumPeaksAllowed;
-   maxBarsBackforZigZag=maximumBarsToAnalyze;
-}
-//_________________________________________________________________________________________________
-//''''''''''''''''''''''''''''''''''''''''''''''''''''''''''''''''''''''''''''''''[ACTION FUNCTION]
-void SetZigZagChartObjectParameters(color colour)
-{
-   colorOfObject=colour;
-}
-//_________________________________________________________________________________________________
-//''''''''''''''''''''''''''''''''''''''''''''''''''''''''''''''''''''''''''''''''[ACTION FUNCTION]
-void CreateZigZagPeakSArrow()
+void CreateZigZagPeakArrays(int maxBarsBackforZigZagIN)
 {
    int totalPeakObjects=0;
-   for(int i=0;i<maxBarsBackforZigZag;i++)//iLoopCreatePeakObj
+   for(int i=0;i<maxBarsBackforZigZagIN;i++)//iLoopCreatePeakObj
    {
-      if(totalPeakObjects>maxZigZagPeaksAllowed) break;
-      else
-      {
-         barOfObject=i;
-         ProvideBarToTimeConversion(barOfObject);
-         priceLevel=ProvidePeakPrice(i);
-         if(priceLevel!=0)
-         {       
-            NameSmallArrow("ZigZag_"+IntegerToString(totalPeakObjects));
-            //CreateSArrow();
-            totalPeakObjects++;
-            NameTextBox("ZigZag_");
-            CreateTextBox(IntegerToString(totalPeakObjects),8,clrWhite);
-            ArrayResize(zigZagPeakArray,totalPeakObjects);
-            ArrayResize(zigZagPeakID,totalPeakObjects);
-            zigZagPeakArray[totalPeakObjects-1]=ProvidePeakPrice(i);
-            zigZagPeakID[totalPeakObjects-1]=ProvideZigZagID(totalPeakObjects);
-         }
+      barOfObject=i;
+      ProvideBarToTimeConversion(barOfObject-2);
+      priceLevel=ProvidePeakPrice(i,maxBarsBackforZigZagIN);
+      if(priceLevel!=0)
+      {       
+         totalPeakObjects++;
+         ArrayResize(zigZagPeakArrayGLO,totalPeakObjects);
+         ArrayResize(zigZagPeakIDGLO,totalPeakObjects);
+         zigZagPeakArrayGLO[totalPeakObjects-1]=ProvidePeakPrice(i,maxBarsBackforZigZagIN);
+         zigZagPeakIDGLO[totalPeakObjects-1]=ProvideZigZagID(totalPeakObjects);
       }
    }
 }
 //_________________________________________________________________________________________________
 //''''''''''''''''''''''''''''''''''''''''''''''''''''''''''''''''''''''''''''''''[ACTION FUNCTION]
-void CreateZigZagBars()
+void NormalizeZigZagArrays()
 {
-   ArrayResize(zigZagBarsArray,ArraySize(zigZagPeakID));
+   int numOfPeaks=ArraySize(zigZagPeakIDGLO);
+   if(StringToInteger(StringDemux(zigZagPeakIDGLO[0],2,","))!=0)
+   {
+      //Delete the last peak to make way for a new one. 
+      zigZagPeakArrayGLO[numOfPeaks-1]=0;
+      ArrayCopy(zigZagPeakArrayGLO,zigZagPeakArrayGLO,1,0,numOfPeaks-1);
+      zigZagPeakIDGLO[numOfPeaks-1]="";
+      ArrayCopy(zigZagPeakIDGLO,zigZagPeakIDGLO,1,0,numOfPeaks-1);
+      if(zigZagPeakArrayGLO[1]>Ask)
+      {
+         //Assign the 0 peak value
+         zigZagPeakArrayGLO[0]=iLow(NULL,0,0);
+         zigZagPeakIDGLO[0]=  "<"+
+                              DoubleToStr(iLow(NULL,0,0))+","+
+                              IntegerToString(-1)+","+
+                              IntegerToString(0)+
+                              ">";
+      }
+      else
+      {
+         //Assign the 0 peak value
+         zigZagPeakArrayGLO[0]=iHigh(NULL,0,0);
+         zigZagPeakIDGLO[0]=  "<"+
+                              DoubleToStr(iHigh(NULL,0,0))+","+
+                              IntegerToString(-1)+","+
+                              IntegerToString(0)+
+                              ">";
+      }
+   }
+}
+//_________________________________________________________________________________________________
+//''''''''''''''''''''''''''''''''''''''''''''''''''''''''''''''''''''''''''''''''[ACTION FUNCTION]
+void CreateZigZagBars(int & averageZigZagBarsOUT)
+{
    int totalSum=0;
    int prevValue=0;
-   for(int i=0;i<ArraySize(zigZagPeakID)-1;i++)
+   for(int i=0;i<ArraySize(zigZagPeakIDGLO)-1;i++)
    {
-      int iValue=StrToInteger(StringDemux(zigZagPeakID[i],2,","));
-      int nextValue=StrToInteger(StringDemux(zigZagPeakID[i+1],2,","));
-      zigZagBarsArray[i]=nextValue-iValue;
+      int iValue=StrToInteger(StringDemux(zigZagPeakIDGLO[i],2,","));
+      int nextValue=StrToInteger(StringDemux(zigZagPeakIDGLO[i+1],2,","));
       totalSum=iValue+prevValue;
       prevValue=iValue;
    }
-   averageZigZagBars=(int)MathCeil(totalSum/(ArraySize(zigZagPeakID)-1));
+   averageZigZagBarsOUT=(int)MathCeil(totalSum/(ArraySize(zigZagPeakIDGLO)-1));
+}
+//=========================================[DOCUMENTATION]=========================================
+//averageZigZagBarsOUT is the average distance between 2 zig zag peaks. 
+//_________________________________________________________________________________________________
+//''''''''''''''''''''''''''''''''''''''''''''''''''''''''''''''''''''''''''''''''[ACTION FUNCTION]
+void CreatePeakUpOrDown(bool & is0PeakUpGLOOUT)
+{
+   double priceOfZigZagOrigin0=StrToDouble(StringDemux(zigZagPeakIDGLO[0],0,","));
+   double priceOfZigZagOrigin1=StrToDouble(StringDemux(zigZagPeakIDGLO[1],0,","));
+   if(priceOfZigZagOrigin0>priceOfZigZagOrigin1){is0PeakUpGLOOUT=true;}
+   else{is0PeakUpGLOOUT=false;}
+}
+//=========================================[DOCUMENTATION]=========================================
+//If 0 peak is higher than 1 peak, then is0PeakUpGLOOUT==true.
+//_________________________________________________________________________________________________
+//''''''''''''''''''''''''''''''''''''''''''''''''''''''''''''''''''''''''''''''''[ACTION FUNCTION]
+void CreateZigZagObj(color objColour)
+{
+   int numOfPeaks=ArraySize(zigZagPeakArrayGLO);
+   for(int i=0;i<numOfPeaks-1;i++)//iLoopnumOfPeaks
+   {
+      int iBar=StrToInteger(StringDemux(zigZagPeakIDGLO[i],2,","));
+      int iBarNext=StrToInteger(StringDemux(zigZagPeakIDGLO[i+1],2,","));
+      priceLevel=zigZagPeakArrayGLO[i];
+      priceLevelP2=zigZagPeakArrayGLO[i+1];
+      timeOfTheBar=ProvideBarToTimeConversionUniversal(iBar);
+      timeOfTheBarP2=ProvideBarToTimeConversionUniversal(iBarNext);
+      NameTLine("ZigZagLine_");
+      CreateTLine(0,2,false,objColour);
+   }
 }
 //_________________________________________________________________________________________________
 //''''''''''''''''''''''''''''''''''''''''''''''''''''''''''''''''''''''''''''''''[ACTION FUNCTION]
-void CreateMaxZigZagBar()
+void ReevaluateGradientOrigins()
 {
-   maxZigZagBar=StrToInteger(StringDemux(zigZagPeakID[ArraySize(zigZagPeakID)-1],2,","));
+   if(StrToInteger(StringDemux(zigZagPeakIDGLO[0],1,","))==-1)
+   {
+      for(int i=0;i<ArraySize(zigZagPeakIDGLO);i++)//iLoopzigZagPeakIDGLO
+      {
+         string iItemID0=StringDemux(zigZagPeakIDGLO[i],0,",");
+         string iItemID2=StringDemux(zigZagPeakIDGLO[i],2,",");
+         zigZagPeakIDGLO[i]="<"+iItemID0+","+IntegerToString(i+1)+","+iItemID2;
+      }
+   }
 }
 //_________________________________________________________________________________________________
 //''''''''''''''''''''''''''''''''''''''''''''''''''''''''''''''''''''''''''''''''[ACTION FUNCTION]
-void CreatePeakUpOrDown(bool & is0PeakUpOrDownOUT)
+void CreateZigZagTenthLabelObj(color objColour)
 {
-   double priceOfZigZagOrigin0=StrToDouble(StringDemux(zigZagPeakID[0],0,","));
-   double priceOfZigZagOrigin1=StrToDouble(StringDemux(zigZagPeakID[1],0,","));
-   if(priceOfZigZagOrigin0>priceOfZigZagOrigin1){is0PeakUpOrDownOUT=true;}
-   else{is0PeakUpOrDownOUT=false;}
+   int iUpOrDown;
+   if(is0PeakUpGLO==true){iUpOrDown=0;}
+   else{iUpOrDown=3;}
+   for(int i=0;i<ArraySize(zigZagPeakIDGLO);i++)//iLoopzigZagPeakIDGLO
+   {
+      int iGradOrigin=StrToInteger(StringDemux(zigZagPeakIDGLO[i],1,","));
+      if(MathMod(iGradOrigin,10)==0)
+      {
+         int iBar=StrToInteger(StringDemux(zigZagPeakIDGLO[i],2,","));
+         priceLevel=zigZagPeakArrayGLO[i];
+         timeOfTheBar=ProvideBarToTimeConversionUniversal(iBar);
+         NameTextBox("ZigZagTenth_");
+         CreateTextBox(IntegerToString(iGradOrigin),10,objColour,iUpOrDown);
+      }
+   }
+}
+//_________________________________________________________________________________________________
+//''''''''''''''''''''''''''''''''''''''''''''''''''''''''''''''''''''''''''''''''[ACTION FUNCTION]
+void CreateZigUpOrDownArray(int & zigUpOrDownArrayGLOOUT[])
+{
+   ArrayResize(zigUpOrDownArrayGLOOUT,ArraySize(zigZagPeakIDGLO));
+   int insertTrue=0;
+   int insertFalse=1;
+   for(int i=0;i<ArraySize(zigUpOrDownArrayGLOOUT);i++)//iLoopzigUpOrDownArrayGLOOUT
+   {
+      if(is0PeakUpGLO==true)
+      {
+         if(insertTrue==0){insertTrue=1;}
+         else{insertTrue=0;}
+         zigUpOrDownArrayGLOOUT[i]=insertTrue;
+      }
+      else
+      {
+         if(insertFalse==1){insertFalse=0;}
+         else{insertFalse=1;}
+         zigUpOrDownArrayGLOOUT[i]=insertFalse;
+      }
+   }
+}
+//_________________________________________________________________________________________________
+//''''''''''''''''''''''''''''''''''''''''''''''''''''''''''''''''''''''''''''''''[ACTION FUNCTION]
+void CreateZigRangeArrayPSGOUT(string & zigRangeArrayPSGOUT[])
+{
+   for(int i=0;i<ArraySize(zigZagPeakArrayGLO);i++)//iLoopzigZagPeakArrayGLO
+   {
+      if(i!=ArraySize(zigZagPeakArrayGLO)-1)
+      {
+         double iCurrZigPrice=zigZagPeakArrayGLO[i];
+         double iPrevZigPrice=zigZagPeakArrayGLO[i+1];
+         
+      }
+   }
 }
 //_________________________________________________________________________________________________
 //''''''''''''''''''''''''''''''''''''''''''''''''''''''''''''''''''''''''''''''[PROVIDER FUNCTION]
@@ -689,7 +982,7 @@ string ProvideZigZagID(int gradientChunk)
    return
    (
       "<"+
-      DoubleToStr(priceLevel,4)+","+
+      DoubleToStr(priceLevel)+","+
       IntegerToString(gradientChunk)+","+
       IntegerToString(barOfObject)+
       ">"
@@ -697,10 +990,10 @@ string ProvideZigZagID(int gradientChunk)
 }
 //_________________________________________________________________________________________________
 //''''''''''''''''''''''''''''''''''''''''''''''''''''''''''''''''''''''''''''''[PROVIDER FUNCTION]
-double ProvidePeakPrice(int shift) 
+double ProvidePeakPrice(int shift,int maxBarsBackforZigZagIN) 
 {; 
    double peakListFromZigZagArray[9999]={0};
-   for(int i=0;i<maxBarsBackforZigZag;i++)//iLoopToGetPeakPrice
+   for(int i=0;i<maxBarsBackforZigZagIN;i++)//iLoopToGetPeakPrice
    {
       double currentPeak=iCustom(Symbol(),0,"ZigZag",4,5,3,0,i);
       if(currentPeak!=EMPTY_VALUE&&currentPeak!=0) 
@@ -719,32 +1012,33 @@ double ProvidePeakPrice(int shift)
 char periPeakArrayGLO[];
 //_________________________________________________________________________________________________
 //''''''''''''''''''''''''''''''''''''''''''''''''''''''''''''''''''''''''''''''''''''''[EXECUTION]
-void PeriPeakExecution()
+void PeriPeakExecution(bool enableAllObjPSGIN)
 {
    //______________________________________________________________________________________________
    //''''''''''''''''''''''''''''''''''''''''''''''''''''''''''''''''''''''''''''''''''[PARAMETERS]
    //================================================================[VARIABLES]
-   color periPeakObjColour;
+   color cV1;//periPeakObjColour
+   bool bV1;//enableAllObjPSGIN
    //================================================================[ARRAYS]
-   char periPeakArray[];
+   char chA1[];//periPeakArray
    //______________________________________________________________________________________________
    //'''''''''''''''''''''''''''''''''''''''''''''''''''''''''''''''''''''''''''''''''''''[METHODS]
    //================================================================[INITIATEARRAYS]
    ArrayResize(periPeakArrayGLO,0);
    //================================================================[SETTER]
-   periPeakObjColour=clrBlue;
+   cV1=clrWhite;
+   bV1=enableAllObjPSGIN;
    //================================================================[EVENTS]
-   CreatePeriPeakArray(periPeakArray);
-   CreatePeriPeakObj(periPeakArray,periPeakObjColour);
+   CreatePeriPeakArray(chA1);
+   if(bV1==true){CreatePeriPeakObj(chA1,cV1);}
    //================================================================[GLOBALCONVERTER]
-   ArrayCopy(periPeakArrayGLO,periPeakArray,0,0,WHOLE_ARRAY);
+   ArrayCopy(periPeakArrayGLO,chA1,0,0,WHOLE_ARRAY);
    //================================================================[DEBUG]
-
    string blankArray[];
-   ArrayResize(blankArray,ArraySize(periPeakArray));
-   for(int i=0;i<ArraySize(periPeakArray);i++)
+   ArrayResize(blankArray,ArraySize(chA1));
+   for(int i=0;i<ArraySize(chA1);i++)
    {
-      blankArray[i]=IntegerToString(periPeakArray[i]);
+      blankArray[i]=IntegerToString(chA1[i]);
    }
    CSVCreationHijacker( blankArray,blankArray,
                         blankArray,blankArray,
@@ -755,10 +1049,10 @@ void PeriPeakExecution()
 //''''''''''''''''''''''''''''''''''''''''''''''''''''''''''''''''''''''''''''''''[ACTION FUNCTION]
 void CreatePeriPeakArray(char & periPeakArrayOUT[])
 {
-   ArrayResize(periPeakArrayOUT,ArraySize(zigZagPeakID));
+   ArrayResize(periPeakArrayOUT,ArraySize(zigZagPeakIDGLO));
    char firstOutputValue;//1=down,2=up
    //1=down,2=up
-   if(is0PeakUpOrDown==true){firstOutputValue=2;}
+   if(is0PeakUpGLO==true){firstOutputValue=2;}
    else{firstOutputValue=1;}
    //Totally fills periPeakArrayOUT first but DOES NOT check if peak is valid for perimeter peak. 
    for(int i=0;i<ArraySize(periPeakArrayOUT);i++)//iLoopperiPeakArrayOUT
@@ -780,7 +1074,7 @@ void CreatePeriPeakArray(char & periPeakArrayOUT[])
       //Lower Low test
       if(periPeakArrayOUT[i]==1&&i!=0)
       {
-         double currentLowPrice=StrToDouble(StringDemux(zigZagPeakID[i],0,","));
+         double currentLowPrice=StrToDouble(StringDemux(zigZagPeakIDGLO[i],0,","));
          if(previousLowPrice>currentLowPrice){periPeakArrayOUT[previousLowi]=0;}
          else{periPeakArrayOUT[i]=0;}
          previousLowPrice=currentLowPrice;
@@ -789,7 +1083,7 @@ void CreatePeriPeakArray(char & periPeakArrayOUT[])
       //Higher High test
       if(periPeakArrayOUT[i]==2&&i!=0)
       {
-         double currentHighPrice=StrToDouble(StringDemux(zigZagPeakID[i],0,","));
+         double currentHighPrice=StrToDouble(StringDemux(zigZagPeakIDGLO[i],0,","));
          if(previousHighPrice<currentHighPrice){periPeakArrayOUT[previousHighi]=0;}
          else{periPeakArrayOUT[i]=0;}
          previousHighPrice=currentHighPrice;
@@ -806,12 +1100,399 @@ void CreatePeriPeakObj(char & periPeakArrayOUT[],color periPeakObjColour)
    {
       if(periPeakArrayOUT[i]!=0)
       {
-         barOfObject=StrToInteger(StringDemux(zigZagPeakID[i],2,","));
+         barOfObject=StrToInteger(StringDemux(zigZagPeakIDGLO[i],2,","));
          ProvideBarToTimeConversion(barOfObject);
-         priceLevel=StrToDouble(StringDemux(zigZagPeakID[i],0,","));
+         priceLevel=StrToDouble(StringDemux(zigZagPeakIDGLO[i],0,","));
          NameSmallArrow("PeriPeak_");
-         CreateSArrow();
+         int iUpOrDown;
+         if(is0PeakUpGLO==false)
+         {
+            if(MathMod(i,2)==0){iUpOrDown=0;}
+            else{iUpOrDown=1;}
+         }
+         else
+         {
+            if(MathMod(i,2)==0){iUpOrDown=1;}
+            else{iUpOrDown=0;}
+         }
+         CreateSArrow(119,2,iUpOrDown);
       }
+   }
+}
+//________________________________________________________________________________________________
+//\\\\\\\\\\\\\\\\\\\\\\\\\\\\\\\\\\\\\\\\\\\\\\CLASS/////////////////////////////////////////////|--- [Market Hours Indicator]
+//""""""""""""""""""""""""""""""""""""""""""""""""""""""""""""""""""""""""""""""""""""""""""""""""'
+//_________________________________________________________________________________________________
+//''''''''''''''''''''''''''''''''''''''''''''''''''''''''''''''''''''''''''''''''''''''[EXECUTION]
+void MarketHoursExecution( string & marketHoursArrayPSGOUT[],int & asianMarketDurPSGOUT,
+                           int maxBarsToAnalysePSGIN,bool enableAllObjPSGIN)
+{
+   //______________________________________________________________________________________________
+   //''''''''''''''''''''''''''''''''''''''''''''''''''''''''''''''''''''''''''''''''''[PARAMETERS]
+   //================================================================[VARIABLES]
+   color cV1;//asianColour
+   color cV2;//europeanColour
+   color cV3;//usaColour
+   color cV4;//gapBarColour
+   int iV1;//asianHourStart
+   int iV2;//asianHourEnd
+   int iV3;//euroHourStart
+   int iV4;//euroHourEnd
+   int iV5;//usaHourStart
+   int iV6;//usaHourEnd
+   int iV7;//numOfDays;
+   int iV8;//asianDuration
+   datetime daV1;//lastKnownDate
+   bool bV1;//enableAllObjPSGIN
+   //================================================================[ARRAYS]
+   string sA1[];//marketTimingArray
+   //______________________________________________________________________________________________
+   //'''''''''''''''''''''''''''''''''''''''''''''''''''''''''''''''''''''''''''''''''''''[METHODS]
+   //================================================================[SETTER]
+   cV1=C'0,30,35';
+   cV2=C'0,41,48';
+   cV3=C'0,49,58';
+   cV4=C'0,78,91';
+   daV1=TimeCurrent();
+   iV1=23;
+   iV2=7;
+   iV3=8;
+   iV4=16;
+   iV5=12;
+   iV6=20;
+   iV7=maxBarsToAnalysePSGIN/24;
+   bV1=enableAllObjPSGIN;
+   //================================================================[EVENTS]
+   CreateAsianDuration(iV1,iV2,iV8);
+   CreateMarketTimingArray(daV1,iV1,iV2,iV3,iV4,iV5,iV6,sA1,iV7);
+   if(bV1==true){CreateMarkTimingObj(sA1,cV1,cV2,cV3);}
+   if(bV1==true){CreateGapBarObj(sA1,cV4);}
+   //================================================================[PSEUDOGLOBALIZER]
+   ArrayCopy(marketHoursArrayPSGOUT,sA1,0,0,WHOLE_ARRAY);
+   asianMarketDurPSGOUT=iV8;
+   //================================================================[DEBUG]
+   string blankArray[];
+   ArrayResize(blankArray,ArraySize(sA1));
+   for(int i=0;i<ArraySize(sA1);i++)
+   {
+      blankArray[i]="";
+   }
+   CSVCreationHijacker( sA1,blankArray,
+                        blankArray,blankArray,
+                        blankArray,"markhourdebug"
+                        );
+}
+//_________________________________________________________________________________________________
+//''''''''''''''''''''''''''''''''''''''''''''''''''''''''''''''''''''''''''''''''[ACTION FUNCTION]
+void CreateAsianDuration(int asianHourStartIN,int asianHourEndIN,int & asianDurationOUT)
+{
+   if(asianHourStartIN<asianHourEndIN){asianDurationOUT=asianHourEndIN-asianHourStartIN;}
+   else{asianDurationOUT=(24-asianHourStartIN)+(asianHourEndIN);}
+}
+//_________________________________________________________________________________________________
+//''''''''''''''''''''''''''''''''''''''''''''''''''''''''''''''''''''''''''''''''[ACTION FUNCTION]
+void CreateMarketTimingArray( datetime lastKnownDateIN,int asianHourStartIN,int asianHourEndIN,
+                              int euroHourStartIN,int euroHourEndIN,int usaHourStartIN,
+                              int usaHourEndIN,string & marketTimingArrayOUT[],int numOfDaysIN)
+{
+   string currYear=IntegerToString(TimeYear(lastKnownDateIN));
+   string currMonth=IntegerToString(TimeMonth(lastKnownDateIN));
+   string currDay=IntegerToString(TimeDay(lastKnownDateIN));
+   //Asian time MUST END on the day itself and begin on the PREVIOUS DAY.
+   string currATimeEnd=currYear+"."+currMonth+"."+currDay+" "+IntegerToString(asianHourEndIN)+":00";
+   string currATimeStart=TimeToStr(StringToTime(currATimeEnd)-(24-asianHourStartIN+asianHourEndIN)*3600);
+   string currETimeStart=currYear+"."+currMonth+"."+currDay+" "+IntegerToString(euroHourStartIN)+":00";
+   string currETimeEnd=currYear+"."+currMonth+"."+currDay+" "+IntegerToString(euroHourEndIN)+":00";
+   string currUTimeStart=currYear+"."+currMonth+"."+currDay+" "+IntegerToString(usaHourStartIN)+":00";
+   string currUTimeEnd=currYear+"."+currMonth+"."+currDay+" "+IntegerToString(usaHourEndIN)+":00";
+   int outCount=0;
+   int weekCount=1;
+   int weekAdder=0;
+   for(int i=0;i<9999;i++)//iLoop9999
+   {
+      datetime iDate=lastKnownDateIN-(i*86400);
+      int iDay=TimeDay(iDate);
+      bool newWeek=false;
+      if(TimeDayOfWeek(iDate)!=6&&TimeDayOfWeek(iDate)!=0)
+      {
+         weekAdder=1;
+         ArrayResize(marketTimingArrayOUT,ArraySize(marketTimingArrayOUT)+1);
+         marketTimingArrayOUT[outCount]=  IntegerToString(iDay)+","+
+                                          IntegerToString(weekCount)+","+
+                                          TimeToStr(StringToTime(currATimeStart)-(i*86400))+","+
+                                          TimeToStr(StringToTime(currATimeEnd)-(i*86400))+","+
+                                          TimeToStr(StringToTime(currETimeStart)-(i*86400))+","+
+                                          TimeToStr(StringToTime(currETimeEnd)-(i*86400))+","+
+                                          TimeToStr(StringToTime(currUTimeStart)-(i*86400))+","+
+                                          TimeToStr(StringToTime(currUTimeEnd)-(i*86400));
+         outCount++;
+         if(outCount>numOfDaysIN){break;}
+      }
+      if(TimeDayOfWeek(iDate)==6||TimeDayOfWeek(iDate)==0){newWeek=true;}
+      if(newWeek==true){weekCount+=weekAdder;weekAdder=0;}
+   }
+}
+//_________________________________________________________________________________________________
+//''''''''''''''''''''''''''''''''''''''''''''''''''''''''''''''''''''''''''''''''[ACTION FUNCTION]
+void CreateMarkTimingObj(  string & marketTimingArrayIN[],color asianColourIN,
+                           color euroColourIN,color usaColourIN)
+{
+   priceLevel=1000;
+   priceLevelP2=0;
+   for(int i=0;i<ArraySize(marketTimingArrayIN);i++)//iLoopmarketTimingArrayIN
+   {
+      string iDay=StringDemux(marketTimingArrayIN[i],0,",");
+      //Asian
+      timeOfTheBar=StringToTime(StringDemux(marketTimingArrayIN[i],2,","));
+      timeOfTheBarP2=StringToTime(StringDemux(marketTimingArrayIN[i],3,","))-3600;
+      NameRect("MarkTime_Asian_Day"+iDay);
+      CreateRect(asianColourIN,true);
+      //Euro
+      timeOfTheBar=StringToTime(StringDemux(marketTimingArrayIN[i],4,","));
+      timeOfTheBarP2=StringToTime(StringDemux(marketTimingArrayIN[i],5,","))-3600;
+      NameRect("MarkTime_Euro_Day"+iDay);
+      CreateRect(euroColourIN,true);
+      //USA
+      timeOfTheBar=StringToTime(StringDemux(marketTimingArrayIN[i],6,","));
+      timeOfTheBarP2=StringToTime(StringDemux(marketTimingArrayIN[i],7,","))-3600;
+      NameRect("MarkTime_USA_Day"+iDay);
+      CreateRect(usaColourIN,true);
+   }
+}
+//_________________________________________________________________________________________________
+//''''''''''''''''''''''''''''''''''''''''''''''''''''''''''''''''''''''''''''''''[ACTION FUNCTION]
+void CreateGapBarObj(string & marketTimingArray[],color objColour)
+{
+   for(int i=0;i<ArraySize(marketTimingArray);i++)//iLoopmarketTimingArray
+   {
+      priceLevel=1;
+      priceLevelP2=0;
+      datetime iTimeOfBar=StrToTime(StringDemux(marketTimingArray[i],3,","));
+      timeOfTheBar=iTimeOfBar;
+      timeOfTheBarP2=iTimeOfBar;
+      barOfObject=iBarShift(NULL,0,iTimeOfBar,false);
+      barOfObjectP2=barOfObject;
+      NameTLine("GapBar_");
+      CreateTLine(0,1,true,objColour);
+   }
+}
+//________________________________________________________________________________________________
+//\\\\\\\\\\\\\\\\\\\\\\\\\\\\\\\\\\\\\\\\\\\\\\CLASS/////////////////////////////////////////////|--- [Asian Market Analysis]
+//""""""""""""""""""""""""""""""""""""""""""""""""""""""""""""""""""""""""""""""""""""""""""""""""'
+//_________________________________________________________________________________________________
+//''''''''''''''''''''''''''''''''''''''''''''''''''''''''''''''''''''''''''''''''''''''[EXECUTION]
+void AsianAnalyticsExecution( string & marketHoursArrayPSGIN[],int barsToAnalysePSGIN,
+                              int asianMarketDurPSGIN,double & psyPricesArrayPSGIN[],
+                              bool enableAllObjPSGIN)
+{
+   //______________________________________________________________________________________________
+   //''''''''''''''''''''''''''''''''''''''''''''''''''''''''''''''''''''''''''''''''''[PARAMETERS]
+   //================================================================[VARIABLES]
+   color cV1;//objColour
+   color cV2;//bullColour
+   color cV3;//bearColour
+   color cV4;//HZoneColour
+   color cV5;//psyHit1Colour
+   color cV6;//asPropSLColour
+   color cV7;//asPropSLViolCol
+   color cV8;//asTPCol
+   int iV1;//barsToAnalyse
+   int iV2;//asianMarketDurPSGIN
+   int iV3;//numOfAsianHZones
+   int iV4;//psySLMult
+   string sV1;//globalDelimiterGLO
+   string sV2;//globalDelimiter2GLO
+   string sV3;//globalDelimiter3GLO
+   string sV4;//globalDelimiter4GLO
+   bool bV1;//is0PeakUpGLO
+   bool bV2;//enableAllObjPSGIN
+   bool bV3;//zerothEndBarIsValid
+   bool bV4;//zerothUSAIsValid
+   double dV1;//psySLHuntDef
+   double dV2;//takeProfitPips
+   //================================================================[ARRAYS]
+   string sA1[];//marketHoursArrayPSGIN
+   string sA2[];//asianAnalyticsArray
+   string sA3[];//barsInfoArray
+   string sA4[];//asianZigAnalInfoArray
+   string sA5[];//asianZigTrendArray
+   string sA6[];//asianZigTextArray
+   string sA7[];//asianHZonesArray
+   string sA8[];//asianPsyHitsArray
+   string sA9[];//asHZonePkTypArray
+   string sA10[];//asOrderPropArray
+   string sA11[];//asPropAnalArray
+   int iA1[];//zigUpOrDownArrayGLO
+   double dA1[];//psyPricesArrayPSGIN
+   //______________________________________________________________________________________________
+   //'''''''''''''''''''''''''''''''''''''''''''''''''''''''''''''''''''''''''''''''''''''[METHODS]
+   //================================================================[SETTER]
+   cV1=C'0,91,107';
+   cV2=clrDodgerBlue;
+   cV3=clrDeepPink;
+   cV4=C'156,0,73';
+   cV5=cV4;
+   cV6=clrBlue;
+   cV7=clrRed;
+   cV8=clrLime;
+   iV1=barsToAnalysePSGIN;
+   iV2=asianMarketDurPSGIN;
+   iV3=20;
+   iV4=1;
+   sV1=globalDelimiterGLO;
+   sV2=globalDelimiter2GLO;
+   sV3=globalDelimiter3GLO;
+   sV4=globalDelimiter4GLO;
+   bV1=is0PeakUpGLO;
+   bV2=enableAllObjPSGIN;
+   dV1=0.3;
+   dV2=30;
+   //================================================================[ARRAYSETTER]
+   ArrayCopy(sA1,marketHoursArrayPSGIN,0,0,WHOLE_ARRAY);
+   ArrayCopy(iA1,zigUpOrDownArrayGLO,0,0,WHOLE_ARRAY);
+   ArrayCopy(dA1,psyPricesArrayPSGIN,0,0,WHOLE_ARRAY);
+   //================================================================[EVENTS]
+   SetAsianZigTextArray(sA6);
+   CreateBarsInfoArray(sA3,iV1);
+   CreateZerothEndBarIsValid(sA1,bV3);
+   CreateZerothUSAIsValid(sA1,bV4);
+   CreateAsianAnalyticsArray(sA1,sA2,sA3,iV1,iV2);
+   CreateAsianZigAnalInfoArray(sA1,sA2,sA4,sV1,sV2);
+   CreateAsianZigTrendArray(sV1,sV2,sA4,sA5,iA1,sA6);
+   CreateAsianHZones(sA4,sA7,sV1,iV3,sA9,iA1,sA1);
+   CreateAsianPsyHits(sA7,sV1,sV2,sA8,sA9);
+   CreateAsOrderPropArray(sV1,sV2,sA4,sA5,sA10,sA6,bV3,sA1,iV4,dV1,dV2);
+   CreateAsPropAnalArray(sV1,sV2,sA1,sA10,sA11,bV4);
+   if(bV2==true){CreateAsianObj(cV2,cV3,sA5,sA1,sV1,sA6,sA7,cV4,sA8,cV5,sV2,sA10,cV6,cV7,cV8,sA11);}
+   //================================================================[PSEUDOGLOBALIZER]
+   //================================================================[DEBUG]
+   string blankArray[];
+   ArrayResize(blankArray,ArraySize(sA1));
+   for(int i=0;i<ArraySize(sA1);i++)
+   {
+      blankArray[i]="";
+   }
+   CSVCreationHijacker(sA4,sA5,sA8,sA10,sA11,"asiananalyticsdebug");
+}
+//================================================================================================
+//================================================================================================
+//================================================================================================
+//================================================================================================
+//================================================================================================
+//================================================================================================
+
+
+//                           Item Hidden due to copyrighted material
+//                                   COPYRIGHT 2019 Ben Leong 
+
+
+//                           Item Hidden due to copyrighted material
+//                                   COPYRIGHT 2019 Ben Leong 
+
+
+//                           Item Hidden due to copyrighted material
+//                                   COPYRIGHT 2019 Ben Leong 
+
+
+//================================================================================================
+//================================================================================================
+//================================================================================================
+//================================================================================================
+//================================================================================================
+//================================================================================================
+//________________________________________________________________________________________________
+//\\\\\\\\\\\\\\\\\\\\\\\\\\\\\\\\\\\\\\\\\\\\\\CLASS/////////////////////////////////////////////|--- [Bollinger Bands Indicator]
+//""""""""""""""""""""""""""""""""""""""""""""""""""""""""""""""""""""""""""""""""""""""""""""""""'
+//_________________________________________________________________________________________________
+//''''''''''''''''''''''''''''''''''''''''''''''''''''''''''''''''''''''''''''''''''''''[EXECUTION]
+void BollingerBandExecution(string & marketHoursArrayPSGIN[],bool enableAllObjPSGIN)
+{
+   //______________________________________________________________________________________________
+   //''''''''''''''''''''''''''''''''''''''''''''''''''''''''''''''''''''''''''''''''''[PARAMETERS]
+   //================================================================[VARIABLES]
+   color cV1;//firstStdObjCol
+   color cV2;//secStdObjCol
+   double dV1;//firstStdDev
+   double dV2;//secStdDev
+   bool bV1;//enableAllObjPSGIN
+   //================================================================[ARRAYS]
+   string sA1[];//marketHoursArrayPSGIN
+   string sA2[];//bollBandArray
+   //______________________________________________________________________________________________
+   //'''''''''''''''''''''''''''''''''''''''''''''''''''''''''''''''''''''''''''''''''''''[METHODS]
+   //================================================================[SETTER]
+   cV1=C'0,146,170';
+   cV2=C'0,100,117';
+   dV1=1;
+   dV2=2;
+   bV1=enableAllObjPSGIN;
+   //================================================================[ARRAYSETTER]
+   ArrayCopy(sA1,marketHoursArrayPSGIN,0,0,WHOLE_ARRAY);
+   //================================================================[EVENTS]
+   CreateBollBandArray(sA1,sA2,dV1,dV2);
+   if(bV1==true){CreateBollBandObj(sA1,sA2,cV1,cV2);}
+   //================================================================[PSEUDOGLOBALIZER]
+   //================================================================[DEBUG]
+   string blankArray[];
+   ArrayResize(blankArray,ArraySize(sA1));
+   for(int i=0;i<ArraySize(sA1);i++)
+   {
+      blankArray[i]="";
+   }
+   CSVCreationHijacker( sA1,sA2,
+                        blankArray,blankArray,
+                        blankArray,"bollbanddebug"
+                        );
+}
+//_________________________________________________________________________________________________
+//''''''''''''''''''''''''''''''''''''''''''''''''''''''''''''''''''''''''''''''''[ACTION FUNCTION]
+void CreateBollBandArray(  string & marketHoursArrayPSGIN[],string & bollBandArrayOUT[],
+                           double firstStdDevIN,double secStdDevIN)
+{
+   ArrayResize(bollBandArrayOUT,ArraySize(marketHoursArrayPSGIN));
+   for(int i=0;i<ArraySize(bollBandArrayOUT);i++)//iLoopbollBandArrayOUT
+   {
+      int iShift=iBarShift(NULL,1440,StrToTime(StringDemux(marketHoursArrayPSGIN[i],4,",")));
+      double iFirstUpperBand=iBands(NULL,1440,20,firstStdDevIN,0,0,1,iShift);
+      double iSecUpperBand=iBands(NULL,1440,20,secStdDevIN,0,0,1,iShift);
+      double iFirstLowerBand=iBands(NULL,1440,20,firstStdDevIN,0,0,2,iShift);
+      double iSecLowerBand=iBands(NULL,1440,20,secStdDevIN,0,0,2,iShift);
+      bollBandArrayOUT[i]= IntegerToString(iShift)+","+
+                           DoubleToStr(iFirstUpperBand)+","+
+                           DoubleToStr(iSecUpperBand)+","+
+                           DoubleToStr(iFirstLowerBand)+","+
+                           DoubleToStr(iSecLowerBand);
+   }
+}
+//_________________________________________________________________________________________________
+//''''''''''''''''''''''''''''''''''''''''''''''''''''''''''''''''''''''''''''''''[ACTION FUNCTION]
+void CreateBollBandObj( string & marketHoursArrayPSGIN[],string & bollBandArrayIN[],
+                        color firstStdObjColIN,color secStdObjColIN)
+{
+   for(int i=0;i<ArraySize(bollBandArrayIN);i++)//iLoopbollBandArrayIN
+   {
+      timeOfTheBarP2=StrToTime(StringDemux(marketHoursArrayPSGIN[i],2,","));;
+      timeOfTheBar=StrToTime(StringDemux(marketHoursArrayPSGIN[i],7,","))-3600;
+      //Upper first stddev
+      priceLevel=StrToDouble(StringDemux(bollBandArrayIN[i],1,","));
+      priceLevelP2=priceLevel;
+      NameTLine("Bolls_Up_FirstDev_");
+      CreateTLine(0,2,0,firstStdObjColIN);
+      //Upper sec stddev
+      priceLevel=StrToDouble(StringDemux(bollBandArrayIN[i],2,","));
+      priceLevelP2=priceLevel;
+      NameTLine("Bolls_Up_SecDev_");
+      CreateTLine(0,2,0,secStdObjColIN);
+      //Lower first stddev
+      priceLevel=StrToDouble(StringDemux(bollBandArrayIN[i],3,","));
+      priceLevelP2=priceLevel;
+      NameTLine("Bolls_Low_FirstDev_");
+      CreateTLine(0,2,0,firstStdObjColIN);
+      //Lower sec stddev
+      priceLevel=StrToDouble(StringDemux(bollBandArrayIN[i],4,","));
+      priceLevelP2=priceLevel;
+      NameTLine("Bolls_Low_SecDev_");
+      CreateTLine(0,2,0,secStdObjColIN);
    }
 }
 //________________________________________________________________________________________________
@@ -842,9 +1523,9 @@ int lineRanksIfBearArray[];
 //''''''''''''''''''''''''''''''''''''''''''''''''''''''''''''''''''''''''''''''''[ACTION FUNCTION]
 void InitializeFiboProj()
 {
-   ArrayResize(barListForPeakArray,ArraySize(zigZagPeakID));
-   ArrayResize(upPeaksEligibleForFiboArray,ArraySize(zigZagPeakID));
-   ArrayResize(downPeaksEligibleForFiboArray,ArraySize(zigZagPeakID));
+   ArrayResize(barListForPeakArray,ArraySize(zigZagPeakIDGLO));
+   ArrayResize(upPeaksEligibleForFiboArray,ArraySize(zigZagPeakIDGLO));
+   ArrayResize(downPeaksEligibleForFiboArray,ArraySize(zigZagPeakIDGLO));
    ArrayResize(fiboSeqArray,0);
    ArrayResize(fiboRetrArray,0);
    ArrayResize(fiboRangeArray,0);
@@ -860,9 +1541,9 @@ void InitializeFiboProj()
    ArrayResize(lineRankerPricesArray,0);
    ArrayResize(lineRanksIfBullArray,0);
    ArrayResize(lineRanksIfBearArray,0);
-   for(int i=0;i<ArraySize(zigZagPeakID);i++)//iLoopExtractBarNumOfPeak
+   for(int i=0;i<ArraySize(zigZagPeakIDGLO);i++)//iLoopExtractBarNumOfPeak
    {
-      barListForPeakArray[i]=StrToInteger(StringDemux(zigZagPeakID[i],2,","));
+      barListForPeakArray[i]=StrToInteger(StringDemux(zigZagPeakIDGLO[i],2,","));
    }
 }
 //_________________________________________________________________________________________________
@@ -920,7 +1601,7 @@ void CheckForFiboPeaks(int peaksToAnalyze)
       if(ArraySize(barListForPeakArray)>i)
       {
          int currentPeakBar=barListForPeakArray[i];
-         double currentPeakPrice=zigZagPeakArray[i];
+         double currentPeakPrice=zigZagPeakArrayGLO[i];
          double currentPeakBolPrice;
          
          currentPeakBolPrice=ProvideUpBolPriceOfBar(currentPeakBar);
@@ -949,21 +1630,21 @@ double ProvideDownBolPriceOfBar(int currentBar)
 //''''''''''''''''''''''''''''''''''''''''''''''''''''''''''''''''''''''''''''''''[ACTION FUNCTION]
 void CreateFiboPeakChartObj()
 {
-   for(int i=0;i<ArraySize(zigZagPeakArray);i++)//iLoopCreateEachFiboPeakObj
+   for(int i=0;i<ArraySize(zigZagPeakArrayGLO);i++)//iLoopCreateEachFiboPeakObj
    {
-      priceLevel=zigZagPeakArray[i];
+      priceLevel=zigZagPeakArrayGLO[i];
       barOfObject=barListForPeakArray[i];
       ProvideBarToTimeConversion(barOfObject);
       
       if(upPeaksEligibleForFiboArray[i]==1)
       {  
          NameSmallArrow("Fibo_Up_");
-         CreateSArrow();
+         CreateSArrow(223,2,1);
       }
       else if(downPeaksEligibleForFiboArray[i]==1)
       {
          NameSmallArrow("Fibo_Down_");
-         CreateSArrow();
+         CreateSArrow(223,2,1);
       }
    }
 }
@@ -972,11 +1653,11 @@ void CreateFiboPeakChartObj()
 void ReduceUpFiboPeaks()
 {
    int posOfPrevFiboPeak=99999999;
-   for(int i=0;i<ArraySize(zigZagPeakArray);i++)//iLoopGoThroughAllUpFiboPeaks
+   for(int i=0;i<ArraySize(zigZagPeakArrayGLO);i++)//iLoopGoThroughAllUpFiboPeaks
    {
       if(ProvideIfFiboPeakCanBeReduced(true,posOfPrevFiboPeak,i,upPeaksEligibleForFiboArray))
       {
-         if(zigZagPeakArray[i]<zigZagPeakArray[posOfPrevFiboPeak])
+         if(zigZagPeakArrayGLO[i]<zigZagPeakArrayGLO[posOfPrevFiboPeak])
          {
             upPeaksEligibleForFiboArray[i]=0;
             posOfPrevFiboPeak=i;
@@ -984,7 +1665,7 @@ void ReduceUpFiboPeaks()
       } 
       else if(ProvideIfFiboPeakCanBeReduced(false,posOfPrevFiboPeak,i,upPeaksEligibleForFiboArray))
       {
-         if(zigZagPeakArray[i]>zigZagPeakArray[posOfPrevFiboPeak])
+         if(zigZagPeakArrayGLO[i]>zigZagPeakArrayGLO[posOfPrevFiboPeak])
          {
             upPeaksEligibleForFiboArray[i]=0;
             posOfPrevFiboPeak=i;
@@ -998,11 +1679,11 @@ void ReduceUpFiboPeaks()
 void ReduceDownFiboPeaks()
 {
    int posOfPrevFiboPeak=99999999;
-   for(int i=0;i<ArraySize(zigZagPeakArray);i++)//iLoopGoThroughAllUpFiboPeaks
+   for(int i=0;i<ArraySize(zigZagPeakArrayGLO);i++)//iLoopGoThroughAllUpFiboPeaks
    {
       if(ProvideIfFiboPeakCanBeReduced(false,posOfPrevFiboPeak,i,downPeaksEligibleForFiboArray))
       {
-         if(zigZagPeakArray[i]>zigZagPeakArray[posOfPrevFiboPeak])
+         if(zigZagPeakArrayGLO[i]>zigZagPeakArrayGLO[posOfPrevFiboPeak])
          {
             downPeaksEligibleForFiboArray[i]=0;
             posOfPrevFiboPeak=i;
@@ -1010,7 +1691,7 @@ void ReduceDownFiboPeaks()
       }
       else if(ProvideIfFiboPeakCanBeReduced(true,posOfPrevFiboPeak,i,downPeaksEligibleForFiboArray))
       {
-         if(zigZagPeakArray[i]<zigZagPeakArray[posOfPrevFiboPeak])
+         if(zigZagPeakArrayGLO[i]<zigZagPeakArrayGLO[posOfPrevFiboPeak])
          {
             downPeaksEligibleForFiboArray[i]=0;
             posOfPrevFiboPeak=i;
@@ -1037,22 +1718,22 @@ void GenerateFiboRanges()
    ArrayResize(isRangeBullOrBearArray,0);
    int numberOfCalculations=0;
 
-   for(int i=0;i<ArraySize(zigZagPeakArray);i++)//iLoopThroughTheUpperPeaks
+   for(int i=0;i<ArraySize(zigZagPeakArrayGLO);i++)//iLoopThroughTheUpperPeaks
    {
       if(upPeaksEligibleForFiboArray[i]==1)
       {
-         for(int j=0;j<ArraySize(zigZagPeakArray);j++)//jLoopThroughDownPeaks
+         for(int j=0;j<ArraySize(zigZagPeakArrayGLO);j++)//jLoopThroughDownPeaks
          {
             if(downPeaksEligibleForFiboArray[j]==1)
             {
-               double fiboRange=zigZagPeakArray[i]-zigZagPeakArray[j];
+               double fiboRange=zigZagPeakArrayGLO[i]-zigZagPeakArrayGLO[j];
                ArrayResize(fiboRangeArray,ArraySize(fiboRangeArray)+1);
                ArrayResize(fiboRangeBackRefArray,ArraySize(fiboRangeBackRefArray)+1);
                ArrayResize(isRangeBullOrBearArray,ArraySize(isRangeBullOrBearArray)+1);
                fiboRangeArray[numberOfCalculations]=fiboRange;
                fiboRangeBackRefArray[numberOfCalculations]= ProvideFiboID(
-                                                            zigZagPeakArray[i],
-                                                            zigZagPeakArray[j],
+                                                            zigZagPeakArrayGLO[i],
+                                                            zigZagPeakArrayGLO[j],
                                                             upperPeakNum,
                                                             lowerPeakNum,
                                                             barListForPeakArray[i],
@@ -1200,7 +1881,7 @@ void CreateFiboRetraceObjects()
             barOfObject=0;
             ProvideBarToTimeConversion(barOfObject);
             NameSmallArrow("Fibo_Retrace_");
-            CreateSArrow();
+            CreateSArrow(223,2,1);
             InsertValueToArrayDouble(lineRankerPricesArray,priceLevel);
             int bullRank=ProvideFiboRetraceRankForObject(j-3,1,isRangeBullOrBearArray[i]);
             int bearRank=ProvideFiboRetraceRankForObject(j-3,0,isRangeBullOrBearArray[i]);
@@ -1284,7 +1965,7 @@ void CreateFiboExtensionObjects()
             barOfObject=0;
             ProvideBarToTimeConversion(barOfObject);
             NameSmallArrow("Fibo_Ext_");
-            CreateSArrow();
+            CreateSArrow(223,2,1);
             InsertValueToArrayDouble(lineRankerPricesArray,priceLevel);
             //int bullRank=ProvideFiboRetraceRankForObject(j-3,1,isRangeBullOrBearArray[i]);
             //int bearRank=ProvideFiboRetraceRankForObject(j-3,0,isRangeBullOrBearArray[i]);
@@ -1392,113 +2073,172 @@ bool ProvideIfMABullishForBar(int barToBeAnalyzed,int fastMA,int slowMA)
 //________________________________________________________________________________________________
 //\\\\\\\\\\\\\\\\\\\\\\\\\\\\\\\\\\\\\\\\\\\\\\CLASS/////////////////////////////////////////////|--- [Stochastics Cross Indicator]
 //""""""""""""""""""""""""""""""""""""""""""""""""""""""""""""""""""""""""""""""""""""""""""""""""'
-//_________________________________________________________________________________________________
-//''''''''''''''''''''''''''''''''''''''''''''''''''''''''''''''''''''''''''''''''''''''[VARIABLES]
-int mainLineStochX;
-int signalLineStochX;
-color bullStochXObjColour;
-color bearStochXObjColour;
-int fastEMAStochX;
-int slowEMAStochX;
-int barsToAnalyzeStochX;
-int ifBarIsOverboughtStochXArray[];
-int ifBarIsOversoldStochXArray[];
-double pricesForMainStochXArray[];
-double pricesForSignalStochXArray[];
-double stochXEMARangeArray[];
-int stochXEMAIfPosArray[];
-//_________________________________________________________________________________________________
-//''''''''''''''''''''''''''''''''''''''''''''''''''''''''''''''''''''''''''''''''[ACTION FUNCTION]
-void InitializeStochX()
+void StochXExecution(int maxBarsToAnalysePSGIN,string & stochXIDArrayPSGOUT[],bool enableAllObjPSGIN)
 {
-   ArrayResize(ifBarIsOverboughtStochXArray,0);
-   ArrayResize(ifBarIsOversoldStochXArray,0);
-   ArrayResize(pricesForMainStochXArray,0);
-   ArrayResize(pricesForSignalStochXArray,0);
-   ArrayResize(stochXEMARangeArray,0);
-   ArrayResize(stochXEMAIfPosArray,0);
-   ArrayResize(isBullStochXAndEMAAvailArray,0);
-   ArrayResize(isBearStochXAndEMAAvailArray,0);
+   //______________________________________________________________________________________________
+   //''''''''''''''''''''''''''''''''''''''''''''''''''''''''''''''''''''''''''''''''''[PARAMETERS]
+   //================================================================[VARIABLES]
+   int iV1;//barsToAnalyzeStochX
+   int iV2;//mainLineStochX
+   int iV3;//signalLineStochX
+   int iV4;//fastEMAStochX
+   int iV5;//slowEMAStochX
+   color cV1;//bullStochXObjColour
+   color cV2;//bearStochXObjColour
+   bool bV1;//enableAllObjPSGIN
+   //================================================================[ARRAYS]
+   int iA1[];//ifBarIsOverboughtStochXArray
+   int iA2[];//ifBarIsOversoldStochXArray
+   int iA3[];//stochXEMAIfPosArray
+   double dA1[];//pricesForMainStochXArray
+   double dA2[];//pricesForSignalStochXArray
+   double dA3[];//stochXEMARangeArray
+   string sA1[];//stochXIDArray
+   //______________________________________________________________________________________________
+   //'''''''''''''''''''''''''''''''''''''''''''''''''''''''''''''''''''''''''''''''''''''[METHODS]
+   //================================================================[INITIATEARRAYS]
+   ArrayResize(stochXIDArrayPSGOUT,0);
+   //================================================================[SETTER]
+   iV1=maxBarsToAnalysePSGIN;
+   iV2=5;
+   iV3=3;
+   iV4=60;
+   iV5=83;
+   cV1=clrDodgerBlue;
+   cV2=clrDeepPink;
+   bV1=enableAllObjPSGIN;
+   //================================================================[EVENTS]
+   CreateStochXArray(dA1,dA2,iV1,iV2,iV3);
+   CompareMainAndSignalStochXArrays(iA1,iA2,iV1,dA1,dA2,sA1);
+   CreateStochXEMAArray(dA3,iA3,iV1,iV4,iV5);
+   if(bV1==true){CreateStochXObjects(cV1,cV2,iA1,iA2,iV1);}
+   //================================================================[PSEUDOGLOBALCONVERTER]
+   ArrayCopy(stochXIDArrayPSGOUT,sA1,0,0,WHOLE_ARRAY);
+   //================================================================[DEBUG]
+
+   //string blankArray[];
+   //ArrayResize(blankArray,ArraySize(periPeakArray));
+   //for(int i=0;i<ArraySize(periPeakArray);i++)
+   //{
+   //   blankArray[i]=IntegerToString(periPeakArray[i]);
+   //}
+   //CSVCreationHijacker( blankArray,blankArray,
+   //                     blankArray,blankArray,
+   //                     blankArray,"futPtObjDebug"
+   //                     );
 }
 //_________________________________________________________________________________________________
 //''''''''''''''''''''''''''''''''''''''''''''''''''''''''''''''''''''''''''''''''[ACTION FUNCTION]
-void SetStochXParam(int mainLine, int signalLine, int barsToAnalyze, int fastEMA, int slowEMA)
+void CreateStochXArray( double & pricesForMainStochXArrayOUT[],double & pricesForSignalStochXArrayOUT[],
+                        int barsToAnalyzeStochXIN,int mainLineStochXIN,int signalLineStochXIN)
 {
-   mainLineStochX=mainLine;
-   signalLineStochX=signalLine;
-   barsToAnalyzeStochX=barsToAnalyze;
-   fastEMAStochX=fastEMA;
-   slowEMAStochX=slowEMA;
-}
-//_________________________________________________________________________________________________
-//''''''''''''''''''''''''''''''''''''''''''''''''''''''''''''''''''''''''''''''''[ACTION FUNCTION]
-void SetStochXObjParam(color bullColour, color bearColour)
-{
-   bullStochXObjColour=bullColour;
-   bearStochXObjColour=bearColour;
-}
-//_________________________________________________________________________________________________
-//''''''''''''''''''''''''''''''''''''''''''''''''''''''''''''''''''''''''''''''''[ACTION FUNCTION]
-void CreateStochXArray()
-{
-   ArrayResize(pricesForMainStochXArray,barsToAnalyzeStochX);
-   ArrayResize(pricesForSignalStochXArray,barsToAnalyzeStochX);
-   for(int i=0;i<barsToAnalyzeStochX;i++)//iLoopbarsToAnalyzeStochX
+   ArrayResize(pricesForMainStochXArrayOUT,barsToAnalyzeStochXIN);
+   ArrayResize(pricesForSignalStochXArrayOUT,barsToAnalyzeStochXIN);
+   for(int i=0;i<barsToAnalyzeStochXIN;i++)//iLoopbarsToAnalyzeStochX
    {
       //K line is the main line (0)
-      pricesForMainStochXArray[i]=iStochastic(NULL,0,mainLineStochX,signalLineStochX,3,MODE_SMA,0,0,i);
+      pricesForMainStochXArrayOUT[i]=iStochastic(  NULL,0,mainLineStochXIN,signalLineStochXIN,
+                                                   3,MODE_SMA,0,0,i);
       //D line is the signal line (1)
-      pricesForSignalStochXArray[i]=iStochastic(NULL,0,mainLineStochX,signalLineStochX,3,MODE_SMA,0,1,i);
+      pricesForSignalStochXArrayOUT[i]=iStochastic(NULL,0,mainLineStochXIN,signalLineStochXIN,
+                                                   3,MODE_SMA,0,1,i);
    }
 }
 //_________________________________________________________________________________________________
 //''''''''''''''''''''''''''''''''''''''''''''''''''''''''''''''''''''''''''''''''[ACTION FUNCTION]
-void CompareMainAndSignalStochXArrays()
+void CompareMainAndSignalStochXArrays( int & ifBarIsOverboughtStochXArrayOUT[],
+                                       int & ifBarIsOversoldStochXArrayOUT[],
+                                       int barsToAnalyzeStochXIN,
+                                       double & pricesForMainStochXArrayIN[],
+                                       double & pricesForSignalStochXArrayIN[],
+                                       string & stochXIDArrayOUT[])
 {
-   ArrayResize(ifBarIsOverboughtStochXArray,barsToAnalyzeStochX);
-   ArrayResize(ifBarIsOversoldStochXArray,barsToAnalyzeStochX);
-   for(int i=0;i<barsToAnalyzeStochX-3;i++)//iLoopbarsToAnalyzeStochX 
+   ArrayResize(ifBarIsOverboughtStochXArrayOUT,barsToAnalyzeStochXIN);
+   ArrayResize(ifBarIsOversoldStochXArrayOUT,barsToAnalyzeStochXIN);
+   ArrayResize(stochXIDArrayOUT,barsToAnalyzeStochXIN);
+   for(int i=0;i<barsToAnalyzeStochXIN-3;i++)//iLoopbarsToAnalyzeStochX 
    //--- minus 3 because you don't need the final 3 values.
    {
       int oldStochXBar=i+3;
-      double oldPrice=pricesForMainStochXArray[oldStochXBar];
+      double oldPrice=pricesForMainStochXArrayIN[oldStochXBar];
       int midStochXBar=i+2;
-      double midPrice=pricesForMainStochXArray[midStochXBar];
+      double midPrice=pricesForMainStochXArrayIN[midStochXBar];
       int newStochXBar=i+1;
-      double newPrice=pricesForMainStochXArray[newStochXBar];
+      double newPrice=pricesForMainStochXArrayIN[newStochXBar];
       int proofOfX=ProvideIfXOccured(  
-                                       pricesForMainStochXArray[oldStochXBar], 
-                                       pricesForSignalStochXArray[oldStochXBar], 
-                                       pricesForMainStochXArray[newStochXBar], 
-                                       pricesForSignalStochXArray[newStochXBar], 
+                                       pricesForMainStochXArrayIN[oldStochXBar], 
+                                       pricesForSignalStochXArrayIN[oldStochXBar], 
+                                       pricesForMainStochXArrayIN[newStochXBar], 
+                                       pricesForSignalStochXArrayIN[newStochXBar], 
                                        oldStochXBar, 
                                        newStochXBar);
+      char entryRecieved=0;
       if(proofOfX==1&&oldPrice>70&&midPrice>75&&newPrice>80)//Bull signal
       {
-         ifBarIsOverboughtStochXArray[i]=1;
+         ifBarIsOverboughtStochXArrayOUT[i]=1;
+         entryRecieved=1;
       }
       else if(proofOfX==1&&oldPrice<30&&midPrice<25&&newPrice<20)//Bear sigsnal
       {
-         ifBarIsOversoldStochXArray[i]=1;
+         ifBarIsOversoldStochXArrayOUT[i]=1;
+         entryRecieved=1;
       }
+      ArrayResize(stochXIDArrayOUT,ArraySize(stochXIDArrayOUT)+1);
+      stochXIDArrayOUT[i]= IntegerToString(entryRecieved)+","+
+                           DoubleToStr(pricesForMainStochXArrayIN[i])+","+
+                           DoubleToStr(pricesForSignalStochXArrayIN[i])+","+
+                           IntegerToString(ifBarIsOverboughtStochXArrayOUT[i])+","+
+                           IntegerToString(ifBarIsOversoldStochXArrayOUT[i]);
    }
 }
 //_________________________________________________________________________________________________
 //''''''''''''''''''''''''''''''''''''''''''''''''''''''''''''''''''''''''''''''''[ACTION FUNCTION]
-void CreateStochXEMAArray()
+void CreateStochXEMAArray( double & stochXEMARangeArrayOUT[],int & stochXEMAIfPosArrayOUT[],
+                           int barsToAnalyzeStochXIN,int fastEMAStochXIN,int slowEMAStochXIN)
 {
-   ArrayResize(stochXEMARangeArray,barsToAnalyzeStochX);
-   ArrayResize(stochXEMAIfPosArray,barsToAnalyzeStochX);
+   ArrayResize(stochXEMARangeArrayOUT,barsToAnalyzeStochXIN);
+   ArrayResize(stochXEMAIfPosArrayOUT,barsToAnalyzeStochXIN);
    int ifBull;
-   for(int i=0;i<barsToAnalyzeStochX-3;i++)//iLoopbarsToAnalyzeStochX
+   for(int i=0;i<barsToAnalyzeStochXIN-3;i++)//iLoopbarsToAnalyzeStochX
    //--- minus 3 because you don't need the final 3 values.
    {
-      stochXEMARangeArray[i]=ProvideRangeBetweenMA(fastEMAStochX,slowEMAStochX,i+1);
-      if(stochXEMARangeArray[i]>0) ifBull=1;
+      stochXEMARangeArrayOUT[i]=ProvideRangeBetweenMA(fastEMAStochXIN,slowEMAStochXIN,i+1);
+      if(stochXEMARangeArrayOUT[i]>0) ifBull=1;
       else ifBull=0;
-      stochXEMAIfPosArray[i]=ifBull;
+      stochXEMAIfPosArrayOUT[i]=ifBull;
    }
 }
+//_________________________________________________________________________________________________
+//''''''''''''''''''''''''''''''''''''''''''''''''''''''''''''''''''''''''''''''''[ACTION FUNCTION]
+void CreateStochXObjects(  color bullStochXObjColourIN,color bearStochXObjColourIN,
+                           int & ifBarIsOverboughtStochXArrayIN[],int & ifBarIsOversoldStochXArrayIN[],
+                           int barsToAnalyzeStochXIN)
+{
+   for(int i=0;i<barsToAnalyzeStochXIN;i++)//iLoopbarsToAnalyzeStochX
+   {
+      if(ifBarIsOverboughtStochXArrayIN[i]==1)
+      {
+         priceLevel=Ask;
+         barOfObject=i;
+         ProvideBarToTimeConversion(barOfObject);
+         colorOfObject=bullStochXObjColourIN;
+         NameSmallArrow("StochX_Bull_");
+         CreateSArrow(159,3,1);
+      }
+      else if(ifBarIsOversoldStochXArrayIN[i]==1)
+      {
+         priceLevel=Ask;
+         barOfObject=i;
+         ProvideBarToTimeConversion(barOfObject);
+         colorOfObject=bearStochXObjColourIN;
+         NameSmallArrow("StochX_Bear_");
+         CreateSArrow(159,3,1);
+      }
+   }
+}
+
+
+
 //_________________________________________________________________________________________________
 //''''''''''''''''''''''''''''''''''''''''''''''''''''''''''''''''''''''''''''''[PROVIDER FUNCTION]
 double ProvideRangeBetweenMA(int fastMA, int slowMA, int barToBeAnalyzed)
@@ -1510,13 +2250,8 @@ double ProvideRangeBetweenMA(int fastMA, int slowMA, int barToBeAnalyzed)
 }
 //_________________________________________________________________________________________________
 //''''''''''''''''''''''''''''''''''''''''''''''''''''''''''''''''''''''''''''''[PROVIDER FUNCTION]
-int ProvideIfXOccured(
-                        double oldMainPrice, 
-                        double oldSignalPrice, 
-                        double newMainPrice, 
-                        double newSignalPrice, 
-                        int oldBar, 
-                        int newBar)
+int ProvideIfXOccured(  double oldMainPrice,double oldSignalPrice,double newMainPrice, 
+                        double newSignalPrice,int oldBar,int newBar)
 {
    double oldRange=oldMainPrice-oldSignalPrice;
    double oldRangeTest=oldRange/MathAbs(oldRange);
@@ -1526,842 +2261,312 @@ int ProvideIfXOccured(
    else return(1);
 }
 //________________________________________________________________________________________________
-//\\\\\\\\\\\\\\\\\\\\\\\\\\\\\\\\\\\\\\\\\\\\\\CLASS/////////////////////////////////////////////|--- [Main Trendlines Indicator]
+//\\\\\\\\\\\\\\\\\\\\\\\\\\\\\\\\\\\\\\\\\\\\\\CLASS/////////////////////////////////////////////|--- [Stochastics Divergence]
 //""""""""""""""""""""""""""""""""""""""""""""""""""""""""""""""""""""""""""""""""""""""""""""""""'
 //_________________________________________________________________________________________________
 //''''''''''''''''''''''''''''''''''''''''''''''''''''''''''''''''''''''''''''''''''''''[EXECUTION]
-void MainTrendsExecution(  string & mainTrendsArrayPSG[],string & mainTrendsIDArrayPSG[])
+void StochDivExecution(int maxBarsToAnalysePSG,string & stochXIDArrayPSGIN[],bool enableAllObjPSGIN)
 {
    //______________________________________________________________________________________________
    //''''''''''''''''''''''''''''''''''''''''''''''''''''''''''''''''''''''''''''''''''[PARAMETERS]
    //================================================================[VARIABLES]
-   double trendMatchSpace;
-   double channelMatchSpace;
-   color mainTrendlineColour;
-   int numOfTrendOrigins;
-   int yAxisDistance;
-   string globalDelimiter;
-   string globalDelimiter2;
-   string globalDelimiter3;
-   string globalDelimiter4;
-   int peaksToAnalyse;
-   double percentChMatch;
+   int iV1;//maxbarsToAnalyse
+   color cV1;//stochBullNDivObjColour
+   color cV2;//stochBullHDivObjColour
+   color cV3;//stochBearNDivObjColour
+   color cV4;//stochBearHDivObjColour
+   bool bV1;//is0PeakUpGLO
+   bool bV2;//enableAllObjPSGIN
    //================================================================[ARRAYS]
-   string mainTrendsArray[];
-   string mainTrendsMatchesArray[];
-   string mainTrendsMatchStringArray[];
-   string expMatchStringArray[];
-   string colExpMatchStringArray[];
-   string colExpMatchRepeatsArray[];
-   string colExpMatchedListArray[];
-   string gradientRecallArray[];
-   string sortedGradientRecallArray[];
-   string maxPeakArray[];
+   string sA1[];//stochDivIDArray
+   string sA2[];//zigZagIDArray
+   string sA3[];//stochXIDArray
+   //______________________________________________________________________________________________
+   //'''''''''''''''''''''''''''''''''''''''''''''''''''''''''''''''''''''''''''''''''''''[METHODS]
+   //================================================================[INITIATEARRAYS]
+   
+   //================================================================[SETTER]
+   iV1=maxBarsToAnalysePSG;
+   cV1=clrDodgerBlue;
+   cV2=clrDodgerBlue;
+   cV3=clrDeepPink;
+   cV4=clrDeepPink;
+   bV1=is0PeakUpGLO;
+   bV2=enableAllObjPSGIN;
+   //================================================================[ARRAYSETTER]
+   ArrayCopy(sA2,zigZagPeakIDGLO,0,0,WHOLE_ARRAY);
+   ArrayCopy(sA3,stochXIDArrayPSGIN,0,0,WHOLE_ARRAY);
+   //================================================================[EVENTS]
+   CreateStochDivArray(sA1,sA2,sA3,bV1);
+   AnalyzeIfDivergence(sA1,sA2);
+   if(bV2==true){CreateStochDivObj(sA1,sA2,cV1,cV2,cV3,cV4);}
+   //================================================================[GLOBALCONVERTER]
+
+   //================================================================[DEBUG]
+
+   string blankArray[];
+   ArrayResize(blankArray,ArraySize(sA2));
+   for(int i=0;i<ArraySize(sA2);i++)
+   {
+      blankArray[i]="";
+   }
+   CSVCreationHijacker( sA2,sA1,
+                        blankArray,blankArray,
+                        blankArray,"stochdivdebug"
+                        );
+}
+//_________________________________________________________________________________________________
+//''''''''''''''''''''''''''''''''''''''''''''''''''''''''''''''''''''''''''''''''[ACTION FUNCTION]
+void CreateStochDivArray(  string & stochDivIDArrayOUT[],string & zigZagIDArrayIN[],
+                           string & stochXIDArrayIN[],bool is0PeakUpGLOIN)
+{
+   ArrayResize(stochDivIDArrayOUT,ArraySize(zigZagIDArrayIN));
+   for(int i=0;i<ArraySize(zigZagIDArrayIN);i++)//iLoopzigZagIDArrayIN
+   {
+      bool isThisZigUpPeak;
+      string isThisZigUpPeakOutput;
+      if(is0PeakUpGLOIN==true)
+      {
+         if(MathMod(i,2)==0){isThisZigUpPeak=true;}
+         else{isThisZigUpPeak=false;}
+      }
+      else
+      {
+         if(MathMod(i,2)==0){isThisZigUpPeak=false;}
+         else{isThisZigUpPeak=true;}
+      }
+      if(isThisZigUpPeak==true){isThisZigUpPeakOutput="1";}
+      else{isThisZigUpPeakOutput="0";}
+      if(i!=ArraySize(zigZagIDArrayIN)-1)
+      {
+         int iZigBar=StrToInteger(StringDemux(zigZagIDArrayIN[i],2,","));
+         int iPrevZigBar;
+         if(i!=0){iPrevZigBar=StrToInteger(StringDemux(zigZagIDArrayIN[i-1],2,","));}
+         else{iPrevZigBar=iZigBar;}
+         int iNextZigBar=StrToInteger(StringDemux(zigZagIDArrayIN[i+1],2,","));
+         int iTotalBarsToAnalyze=iNextZigBar-iPrevZigBar;
+         double iStochPriceArray[];
+         ArrayResize(iStochPriceArray,iTotalBarsToAnalyze);
+         for(int j=0;j<ArraySize(iStochPriceArray);j++)//jLoopiStochPriceArray
+         {
+            iStochPriceArray[j]=StringToDouble(StringDemux(stochXIDArrayIN[iPrevZigBar+j],1,","));
+         }
+         double iStochDivPrice;
+         if(isThisZigUpPeak==true){iStochDivPrice=iStochPriceArray[ArrayMaximum(iStochPriceArray,WHOLE_ARRAY,0)];}
+         else{iStochDivPrice=iStochPriceArray[ArrayMinimum(iStochPriceArray,WHOLE_ARRAY,0)];}
+         stochDivIDArrayOUT[i]=isThisZigUpPeakOutput+","+DoubleToStr(iStochDivPrice);
+      }
+   }
+}
+//_________________________________________________________________________________________________
+//''''''''''''''''''''''''''''''''''''''''''''''''''''''''''''''''''''''''''''''''[ACTION FUNCTION]
+void AnalyzeIfDivergence(string & stochDivIDArrayOUT[],string & zigZagIDArrayIN[])
+{
+   ArrayResize(zigZagIDArrayIN,ArraySize(zigZagIDArrayIN)+10);//Else code below will throw error. 
+   ArrayResize(stochDivIDArrayOUT,ArraySize(stochDivIDArrayOUT)+10);//Else code below will throw error. 
+   for(int i=0;i<ArraySize(zigZagIDArrayIN)-10;i++)//iLoopzigZagIDArrayIN
+   {
+      int iIsCurrentUp=StrToInteger(StringDemux(stochDivIDArrayOUT[i],0,","));
+      int iOutput=0;
+      double iPrevStoch1=StrToDouble(StringDemux(stochDivIDArrayOUT[i+1],1,","));
+      double iPrevStoch3=StrToDouble(StringDemux(stochDivIDArrayOUT[i+3],1,","));
+      double iPrevZigPrice1=StrToDouble(StringDemux(zigZagIDArrayIN[i+1],0,","));
+      double iPrevZigPrice3=StrToDouble(StringDemux(zigZagIDArrayIN[i+3],0,","));
+      //Test if any of the above variables are blank.
+      if(iPrevStoch1==0){iOutput=9999;}
+      else if(iPrevStoch3==0){iOutput=9999;}
+      else if(iPrevZigPrice1==0){iOutput=9999;}
+      else if(iPrevZigPrice3==0){iOutput=9999;}
+      if(i!=ArraySize(zigZagIDArrayIN)-1&&iOutput!=9999)
+      {
+         if(iIsCurrentUp==0)//Current peak is a down peak.
+         {
+            //Bullish normal
+            if(iPrevZigPrice1>iPrevZigPrice3&&iPrevStoch1>iPrevStoch3){iOutput=1;}
+            //Bearish normal
+            else if(iPrevZigPrice1<iPrevZigPrice3&&iPrevStoch1<iPrevStoch3){iOutput=2;}
+            //Bearish regular divergence
+            else if(iPrevZigPrice1>iPrevZigPrice3&&iPrevStoch1<iPrevStoch3){iOutput=3;}
+            //Bearish hidden divergence
+            else if(iPrevZigPrice1<iPrevZigPrice3&&iPrevStoch1>iPrevStoch3){iOutput=4;}
+         }
+         else if(iIsCurrentUp==1)//Current peak is a up peak.
+         {
+            //Bullish normal
+            if(iPrevZigPrice1>iPrevZigPrice3&&iPrevStoch1>iPrevStoch3){iOutput=1;}
+            //Bearish normal
+            else if(iPrevZigPrice1<iPrevZigPrice3&&iPrevStoch1<iPrevStoch3){iOutput=2;}
+            //Bullish regular divergence
+            else if(iPrevZigPrice1<iPrevZigPrice3&&iPrevStoch1>iPrevStoch3){iOutput=3;}
+            //Bullish hidden divergence
+            else if(iPrevZigPrice1>iPrevZigPrice3&&iPrevStoch1<iPrevStoch3){iOutput=4;}
+         }
+         stochDivIDArrayOUT[i]=stochDivIDArrayOUT[i]+","+IntegerToString(iOutput);
+      }
+   }
+   ArrayResize(zigZagIDArrayIN,ArraySize(zigZagIDArrayIN)-10);
+   ArrayResize(stochDivIDArrayOUT,ArraySize(stochDivIDArrayOUT)-10);
+}
+//_________________________________________________________________________________________________
+//''''''''''''''''''''''''''''''''''''''''''''''''''''''''''''''''''''''''''''''''[ACTION FUNCTION]
+void CreateStochDivObj( string & stochDivIDArrayIN[],string & zigZagIDArrayIN[],
+                        color stochBullNDivObjColIN, color stochBullHDivObjColIN,
+                        color stochBearNDivObjColIN, color stochBearHDivObjColIN)
+{
+   for(int i=0;i<ArraySize(zigZagIDArrayIN);i++)//iLoopzigZagIDArrayIN
+   {
+      if(i!=0&&i!=ArraySize(zigZagIDArrayIN)-1)
+      {
+         int iStochDivType=StrToInteger(StringDemux(stochDivIDArrayIN[i],2,","));
+         int iStochUpOrDown=StrToInteger(StringDemux(stochDivIDArrayIN[i],0,","));
+         priceLevel=Ask-microPipM100GLO;
+         barOfObject=StrToInteger(StringDemux(zigZagIDArrayIN[i],2,","));
+         ProvideBarToTimeConversion(barOfObject);
+         if(iStochUpOrDown==0&&iStochDivType==3)//Bearish regular divergence
+         {
+            colorOfObject=stochBearNDivObjColIN;
+            NameSmallArrow("StochDiv_Bear_Reg_");
+            CreateSArrow(159,3,1);
+         }
+         else if(iStochUpOrDown==0&&iStochDivType==4)//Bearish hidden divergence
+         {
+            colorOfObject=stochBearHDivObjColIN;
+            NameSmallArrow("StochDiv_Bear_Hid_");
+            CreateSArrow(162,1,1);
+         }
+         else if(iStochUpOrDown==1&&iStochDivType==3)//Bullish regular divergence
+         {
+            colorOfObject=stochBullNDivObjColIN;
+            NameSmallArrow("StochDiv_Bull_Reg_");
+            CreateSArrow(159,3,1);
+         }
+         else if(iStochUpOrDown==1&&iStochDivType==4)//Bullish hidden divergence
+         {
+            colorOfObject=stochBullHDivObjColIN;
+            NameSmallArrow("StochDiv_Bull_Hid_");
+            CreateSArrow(162,1,1);
+         }
+      }
+   }
+}
+//________________________________________________________________________________________________
+//\\\\\\\\\\\\\\\\\\\\\\\\\\\\\\\\\\\\\\\\\\\\\\CLASS/////////////////////////////////////////////|--- [Main Trendlines Indicator]
+//""""""""""""""""""""""""""""""""""""""""""""""""""""""""""""""""""""""""""""""""""""""""""""""""'
+//_________________________________________________________________________________________________
+//''''''''''''''''''''''''''''''''''''''''''''''''''''''''''''''''''''''''''''''''''''''[EXECUTION]
+void MainTrendsExecution(  string & mainTrendsArrayPSG[],string & mainTrendsIDArrayPSG[],
+                           int averageZigZagBarsPSGIN)
+{
+   //______________________________________________________________________________________________
+   //''''''''''''''''''''''''''''''''''''''''''''''''''''''''''''''''''''''''''''''''''[PARAMETERS]
+   //================================================================[VARIABLES]
+   int iV1;//numOfTrendOrigins
+   int iV2;//yAxisDistance
+   int iV3;//peaksToAnalyse
+   double dV1;//trendMatchSpace
+   double dV2;//channelMatchSpace
+   double dV3;//percentChMatch
+   string sV1;//globalDelimiter
+   string sV2;//globalDelimiter2
+   string sV3;//globalDelimiter3
+   string sV4;//globalDelimiter4
+   color cV1;//mainTrendlineColour
+   //================================================================[ARRAYS]
+   string sA1[];//mainTrendsArray
+   string sA2[];//mainTrendsMatchesArray
+   string sA3[];//mainTrendsMatchStringArray
+   string sA4[];//expMatchStringArray
+   string sA5[];//colExpMatchStringArray
+   string sA6[];//colExpMatchRepeatsArray
+   string sA7[];//colExpMatchedListArray
+   string sA8[];//gradientRecallArray
+   string sA9[];//sortedGradientRecallArray
+   string sA10[];//maxPeakArray
    //______________________________________________________________________________________________
    //'''''''''''''''''''''''''''''''''''''''''''''''''''''''''''''''''''''''''''''''''''''[METHODS]
    //================================================================[SETTER]
-   globalDelimiter=globalDelimiterGLO;
-   globalDelimiter2=globalDelimiter2GLO;
-   globalDelimiter3=globalDelimiter3GLO;
-   globalDelimiter4=globalDelimiter4GLO;
-   trendMatchSpace=0.00005;
-   channelMatchSpace=0.1;
-   yAxisDistance=5*averageZigZagBars;
-   mainTrendlineColour=clrViolet;
-   peaksToAnalyse=40;
-   percentChMatch=0.01;
+   sV1=globalDelimiterGLO;
+   sV2=globalDelimiter2GLO;
+   sV3=globalDelimiter3GLO;
+   sV4=globalDelimiter4GLO;
+   dV1=0.0001;
+   dV2=1;
+   iV2=5*averageZigZagBarsPSGIN;
+   cV1=clrDarkOrchid;
+   iV3=40;
+   dV3=0.03;
    //================================================================[RESETGLOBALVARIABLES]
    //================================================================[EVENTS]
-   CreateTrendOrigins(peaksToAnalyse,numOfTrendOrigins);
-   CreateMainTrendsArray(yAxisDistance,numOfTrendOrigins,mainTrendsArray);
-   CreateMainTrendsMatchesArray( mainTrendsMatchesArray,mainTrendsArray,numOfTrendOrigins,
-                                 trendMatchSpace);
-   FilterMainTrendsMatchesArray(mainTrendsMatchesArray);
-   CreateMainTrendsMatchStringArray(mainTrendsArray,mainTrendsMatchesArray,
-                                    globalDelimiter,peaksToAnalyse,mainTrendsMatchStringArray);
-   CreateExpMatchStringArray( mainTrendsMatchStringArray,peaksToAnalyse,
-                              globalDelimiter,expMatchStringArray);
-   CollapseExpMatchStringArray(  expMatchStringArray,globalDelimiter,
-                                 peaksToAnalyse,colExpMatchStringArray);
-   RemoveFirstGradientOrigin(colExpMatchStringArray);
-   CreateColExpMatchRepeatsArray(mainTrendsMatchStringArray,expMatchStringArray,
-                                 colExpMatchStringArray,colExpMatchRepeatsArray,
-                                 colExpMatchedListArray,globalDelimiter,
-                                 globalDelimiter2);
-                                 
-   EliminateDupsInEachGradOrigin(colExpMatchedListArray,globalDelimiter,globalDelimiter2);
-      
-   CollateColExpMatchStringArray(colExpMatchedListArray,globalDelimiter,globalDelimiter2);
-   
-   CreateMaxPeakArray(  maxPeakArray,colExpMatchedListArray,colExpMatchRepeatsArray,
-                        globalDelimiter,globalDelimiter2);
-                        
-   CreateGradientRecallArray( mainTrendsArray,maxPeakArray,gradientRecallArray,
-                              globalDelimiter,numOfTrendOrigins);
-   CreateSortedGradientRecallArray( gradientRecallArray,sortedGradientRecallArray,globalDelimiter,
-                                    globalDelimiter2,globalDelimiter3,percentChMatch);
-   FilterSortedGradientRecallArray(sortedGradientRecallArray,globalDelimiter);
-   CreateMainTrendObjects( mainTrendsArray,maxPeakArray,gradientRecallArray,
-                           globalDelimiter,numOfTrendOrigins,mainTrendlineColour,
-                           colExpMatchedListArray,sortedGradientRecallArray);
-   //CreateMainTrendsIDArrayPSG(mainTrendsIDArrayPSG,colExpMatchedListArray,colExpMatchRepeatsArray,
-   //                           sortedGradientRecallArray);
+   CreateTrendOrigins(iV3,iV1);
+   CreateMainTrendsArray(iV2,iV1,sA1);
+   CreateMainTrendsMatchesArray(sA2,sA1,iV1,dV1);
+   FilterMainTrendsMatchesArray(sA2);
+   CreateMainTrendsMatchStringArray(sA1,sA2,sV1,iV3,sA3);
+   CreateExpMatchStringArray(sA3,iV3,sV1,sA4);
+   CollapseExpMatchStringArray(sA4,sV1,iV3,sA5);
+   RemoveFirstGradientOrigin(sA5);
+   CreateColExpMatchRepeatsArray(sA3,sA4,sA5,sA6,sA7,sV1,sV2);                       
+   EliminateDupsInEachGradOrigin(sA7,sV1,sV2);
+   CollateColExpMatchStringArray(sA7,sV1,sV2);
+   CreateMaxPeakArray(sA10,sA7,sA6,sV1,sV2);                  
+   CreateGradientRecallArray(sA1,sA10,sA8,sV1,iV1);
+   CreateSortedGradientRecallArray(sA8,sA9,sV1,sV2,sV3,dV3);
+   FilterSortedGradientRecallArray(sA9,sV1);
+   CreateMainTrendObjects(sA1,sA10,sA8,sV1,iV1,cV1,sA7,sA9);
+   //CreateMainTrendsIDArrayPSG(mainTrendsIDArrayPSG,sA7,sA6,sA9);
    //================================================================[DEBUG]
    //debug1
-   ArrayResize(testStrArrayDebug,ArraySize(mainTrendsArray));
-   ArrayCopy(testStrArrayDebug,mainTrendsArray,0,0,WHOLE_ARRAY);
-   ArrayResize(testStrArrayDebug2,ArraySize(mainTrendsMatchesArray));
-   ArrayCopy(testStrArrayDebug2,mainTrendsMatchesArray,0,0,WHOLE_ARRAY);
+   ArrayResize(testStrArrayDebug,ArraySize(sA1));
+   ArrayCopy(testStrArrayDebug,sA1,0,0,WHOLE_ARRAY);
+   ArrayResize(testStrArrayDebug2,ArraySize(sA2));
+   ArrayCopy(testStrArrayDebug2,sA2,0,0,WHOLE_ARRAY);
    //debug2
-   ArrayResize(testStrArrayDebug3,ArraySize(expMatchStringArray));
-   ArrayCopy(testStrArrayDebug3,expMatchStringArray,0,0,WHOLE_ARRAY);
-   ArrayResize(testStrArrayDebug4,ArraySize(colExpMatchRepeatsArray));
-   ArrayCopy(testStrArrayDebug4,colExpMatchRepeatsArray,0,0,WHOLE_ARRAY);
-   ArrayResize(testStrArrayDebug5,ArraySize(sortedGradientRecallArray));
-   ArrayCopy(testStrArrayDebug5,sortedGradientRecallArray,0,0,WHOLE_ARRAY);
-   ArrayResize(testStrArrayDebug6,ArraySize(maxPeakArray));
-   ArrayCopy(testStrArrayDebug6,maxPeakArray,0,0,WHOLE_ARRAY);
-   ArrayResize(testStrArrayDebug7,ArraySize(colExpMatchedListArray));
-   ArrayCopy(testStrArrayDebug7,colExpMatchedListArray,0,0,WHOLE_ARRAY);
+   ArrayResize(testStrArrayDebug3,ArraySize(sA4));
+   ArrayCopy(testStrArrayDebug3,sA4,0,0,WHOLE_ARRAY);
+   ArrayResize(testStrArrayDebug4,ArraySize(sA6));
+   ArrayCopy(testStrArrayDebug4,sA6,0,0,WHOLE_ARRAY);
+   ArrayResize(testStrArrayDebug5,ArraySize(sA9));
+   ArrayCopy(testStrArrayDebug5,sA9,0,0,WHOLE_ARRAY);
+   ArrayResize(testStrArrayDebug6,ArraySize(sA10));
+   ArrayCopy(testStrArrayDebug6,sA10,0,0,WHOLE_ARRAY);
+   ArrayResize(testStrArrayDebug7,ArraySize(sA7));
+   ArrayCopy(testStrArrayDebug7,sA7,0,0,WHOLE_ARRAY);
    //maintrendsdebug
    string blankArray[];
-   ArrayResize(blankArray,ArraySize(sortedGradientRecallArray));
-   CSVCreationHijacker( sortedGradientRecallArray,blankArray,
+   ArrayResize(blankArray,ArraySize(sA9));
+   CSVCreationHijacker( sA9,blankArray,
                         blankArray,blankArray,
                         blankArray,"maintrendsdebug"
                         );
    //================================================================[PSEUDOGLOBALIZER]
-   ArrayCopy(mainTrendsArrayPSG,mainTrendsArray,0,0,WHOLE_ARRAY);
+   ArrayCopy(mainTrendsArrayPSG,sA1,0,0,WHOLE_ARRAY);
 }
-//_________________________________________________________________________________________________
-//''''''''''''''''''''''''''''''''''''''''''''''''''''''''''''''''''''''''''''''''[ACTION FUNCTION]
-void CreateTrendOrigins(int peaksToAnalyseIN,int & numOfTrendOriginsOUT)
-{
-   if(peaksToAnalyseIN==0)
-   {
-      int numOfPeaks=StrToInteger(StringDemux(zigZagPeakID[ArraySize(zigZagPeakID)-1],1,","));
-      numOfTrendOriginsOUT=numOfPeaks-1;
-   }
-   else
-   {
-      numOfTrendOriginsOUT=peaksToAnalyseIN;
-   }
-}
-//=========================================[DOCUMENTATION]=========================================
-//If peaksToAnalyseIN is equal to 0, then set the numOfTrendOriginsOUT to max peak in zigZagPeaks.
-//Else set them to be the same. 
-//_________________________________________________________________________________________________
-//''''''''''''''''''''''''''''''''''''''''''''''''''''''''''''''''''''''''''''''''[ACTION FUNCTION]
-void CreateMainTrendsArray(int yAxisDistanceIN,int numOfTrendOriginsIN,string & mainTrendsArrayOUT[])
-{  
-   int newSize=0;
-   int prevSize;
-   for(int i=0;i<numOfTrendOriginsIN;i++)//iLoopnumOfTrendOriginsIN
-   {
-      int barLocOfYAxisRight=i-yAxisDistanceIN;
-      int barLocOfYAxisLeft=i+yAxisDistanceIN;
-      int sizeToAdd=numOfTrendOriginsIN-i;
-      prevSize=newSize;
-      newSize=newSize+sizeToAdd;
-      ArrayResize(mainTrendsArrayOUT,newSize);
-      double trendOriginPrice=StrToDouble(StringDemux(zigZagPeakID[i],0,","));
-      int trendOriginBar=StrToInteger(StringDemux(zigZagPeakID[i],2,","));
-      for(int j=i+1;j<numOfTrendOriginsIN+1;j++)//jLoopnumOfTrendOriginsIN
-      {
-//=================================================================================================
-//=================================================================================================
-//=================================================================================================
-//
-//
-//
-//                           Item Hidden due to copyrighted material
-//                                   COPYRIGHT 2019 Ben Leong 
-//
-//
-//
-//=================================================================================================
-//=================================================================================================
-//=================================================================================================
-      }
-   }
-}
-//_________________________________________________________________________________________________
-//''''''''''''''''''''''''''''''''''''''''''''''''''''''''''''''''''''''''''''''''[ACTION FUNCTION]
-void CreateMainTrendsMatchesArray(  string & mainTrendsMatchesArrayOUT[],string & mainTrendsArrayIN[],
-                                    int numOfTrendOriginsIN,double trendMatchSpaceIN)
-{
-   ArrayResize(mainTrendsMatchesArrayOUT,ArraySize(mainTrendsArrayIN));
-   int iCounter=0;
-   int overlayArray[];
-   double yInterceptRightArray[];
-   ProvideMuxedStringToDoubleConversion(mainTrendsArrayIN,7,yInterceptRightArray);
-   for(int i=0;i<numOfTrendOriginsIN;i++)//iLoopnumOfTrendOriginsIN
-   {
-      int currentSize=numOfTrendOriginsIN-i;
-      double tempRightPricesArray[];
-      ProvideArrayExtraction(yInterceptRightArray,tempRightPricesArray,currentSize,iCounter);
-      for(int j=0;j<numOfTrendOriginsIN-i;j++)//jLoopmainTrendsArrayIN
-      {
-//=================================================================================================
-//=================================================================================================
-//=================================================================================================
-//
-//
-//
-//                           Item Hidden due to copyrighted material
-//                                   COPYRIGHT 2019 Ben Leong 
-//
-//
-//
-//=================================================================================================
-//=================================================================================================
-//=================================================================================================
-   }
-}
-//_________________________________________________________________________________________________
-//''''''''''''''''''''''''''''''''''''''''''''''''''''''''''''''''''''''''''''''''[ACTION FUNCTION]
-void FilterMainTrendsMatchesArray(string & mainTrendsMatchesArrayOUT[])
-{
-   for(int i=0;i<ArraySize(mainTrendsMatchesArrayOUT);i++)//iLoopmainTrendsMatchesArrayINOUT
-   {
-      if(StringFind(mainTrendsMatchesArrayOUT[i],",",0)==-1)
-      {
-         mainTrendsMatchesArrayOUT[i]="";
-      }
-   }
-}
-//=========================================[DOCUMENTATION]=========================================
-//Removes points with only 1 match (with itself). 
-//_________________________________________________________________________________________________
-//''''''''''''''''''''''''''''''''''''''''''''''''''''''''''''''''''''''''''''''''[ACTION FUNCTION]
-void CreateMainTrendsMatchStringArray( string & mainTrendsArrayIN[],
-                                       string & mainTrendsMatchesArrayIN[],
-                                       string globalDelimiterIN,
-                                       int peaksToAnalyseIN,
-                                       string & mainTrendsMatchStringArrayOUT[])
-{
-   string evaluationString;
-   int memoryArray[];
-   string delimiter="";
-   ushort u_comma=StringGetCharacter(",",0);
-   for(int i=0;i<ArraySize(mainTrendsArrayIN);i++)//iLoopmainTrendsArrayIN
-   {
-//=================================================================================================
-//=================================================================================================
-//=================================================================================================
-//
-//
-//
-//                           Item Hidden due to copyrighted material
-//                                   COPYRIGHT 2019 Ben Leong 
-//
-//
-//
-//=================================================================================================
-//=================================================================================================
-//=================================================================================================
-   }
-}
-//=========================================[DOCUMENTATION]=========================================
-//Removes copies from each gradient origin. 
-//_________________________________________________________________________________________________
-//''''''''''''''''''''''''''''''''''''''''''''''''''''''''''''''''''''''''''''''''[ACTION FUNCTION]
-void CreateExpMatchStringArray(  string & mainTrendsMatchStringArrayIN[],int peaksToAnalyseIN,
-                                 string globalDelimiterIN,string & expMatchStringArrayOUT[])
-{
-   ushort u_delim=StringGetChar(globalDelimiterIN,0);
-   ArrayResize(expMatchStringArrayOUT,ArraySize(mainTrendsMatchStringArrayIN));
-   for(int i=0;i<ArraySize(mainTrendsMatchStringArrayIN);i++)//iLoopmainTrendsMatchStringArrayIN
-   {
-//=================================================================================================
-//=================================================================================================
-//=================================================================================================
-//
-//
-//
-//                           Item Hidden due to copyrighted material
-//                                   COPYRIGHT 2019 Ben Leong 
-//
-//
-//
-//=================================================================================================
-//=================================================================================================
-//=================================================================================================
-   }
-}
-//=========================================[DOCUMENTATION]=========================================
-//Creates a new array called expMatchStringArray that indicates that for each gradient origin, which
-//gradients within it should be represented with. The program is designed to have all similar 
-//gradients be represented with the gradientorigin closest to the current time bar. 
-//_________________________________________________________________________________________________
-//''''''''''''''''''''''''''''''''''''''''''''''''''''''''''''''''''''''''''''''''[ACTION FUNCTION]
-void CollapseExpMatchStringArray(string & expMatchStringArrayIN[],string globalDelimiterIN,
-                                 int peaksToAnalyseIN, string & colExpMatchStringArrayOUT[])
-{
-   //Permanently extend expMatchStringArrayIN size by 1 because expMatchStringArrayIN contains 
-   //peaksToAnalyseIN - 1 items. Due to a quirk of the above function (CreateExpMatchStringArray) 
-   //where the final item was not compared at all. 
-   ArrayResize(expMatchStringArrayIN,ArraySize(expMatchStringArrayIN)+1);
-   ArrayResize(colExpMatchStringArrayOUT,ArraySize(expMatchStringArrayIN));
-   //Loop through expMatchStringArrayIN to analyse each item.  
-   for(int i=0;i<peaksToAnalyseIN;i++)//iLooppeaksToAnalyseIN
-   {
-//=================================================================================================
-//=================================================================================================
-//=================================================================================================
-//
-//
-//
-//                           Item Hidden due to copyrighted material
-//                                   COPYRIGHT 2019 Ben Leong 
-//
-//
-//
-//=================================================================================================
-//=================================================================================================
-//=================================================================================================
-   }
-}
-//=========================================[DOCUMENTATION]=========================================
-//Collapses the expMatchStringArrayIN into individual gradient matches. 
-//_________________________________________________________________________________________________
-//''''''''''''''''''''''''''''''''''''''''''''''''''''''''''''''''''''''''''''''''[ACTION FUNCTION]
-void RemoveFirstGradientOrigin(string & colExpMatchStringArrayOUT[])
-{
-   colExpMatchStringArrayOUT[0]="";
-}
-//_________________________________________________________________________________________________
-//''''''''''''''''''''''''''''''''''''''''''''''''''''''''''''''''''''''''''''''''[ACTION FUNCTION]
-void CreateColExpMatchRepeatsArray( string & mainTrendsMatchStringArrayIN[],
-                                    string & expMatchStringArrayIN[],
-                                    string & colExpMatchStringArrayIN[],
-                                    string & colExpMatchRepeatsArrayOUT[],
-                                    string & colExpMatchedListArrayOUT[],
-                                    string globalDelimiterIN,
-                                    string globalDelimiter2IN)
-{
-   //Required because this array has peaksToAnalyse-1 number of items. Due to a quirk in above. 
-   ArrayResize(mainTrendsMatchStringArrayIN,ArraySize(mainTrendsMatchStringArrayIN)+1);
-   //Resizes all these arrays to match colExpMatchStringArrayIN.
-   ArrayResize(expMatchStringArrayIN,ArraySize(mainTrendsMatchStringArrayIN));
-   ArrayResize(colExpMatchStringArrayIN,ArraySize(mainTrendsMatchStringArrayIN));
-   ArrayResize(colExpMatchRepeatsArrayOUT,ArraySize(mainTrendsMatchStringArrayIN));
-   ArrayResize(colExpMatchedListArrayOUT,ArraySize(mainTrendsMatchStringArrayIN));
-   ushort u_delim=StringGetChar(globalDelimiterIN,0);
-   //Loop through each item in colExpMatchStringArrayIN to access each muxed string.
-   for(int i=0;i<ArraySize(colExpMatchStringArrayIN);i++)//iLoopcolExpMatchStringArrayIN
-   {
-//=================================================================================================
-//=================================================================================================
-//=================================================================================================
-//
-//
-//
-//                           Item Hidden due to copyrighted material
-//                                   COPYRIGHT 2019 Ben Leong 
-//
-//
-//
-//=================================================================================================
-//=================================================================================================
-//=================================================================================================
-   }
-}
-//_________________________________________________________________________________________________
-//''''''''''''''''''''''''''''''''''''''''''''''''''''''''''''''''''''''''''''''''[ACTION FUNCTION]
-void EliminateDupsInEachGradOrigin( string & colExpMatchedListArrayOUT[],string globalDelimiterIN,
-                                    string globalDelimiter2IN)
-{
-   ushort u_delim=StringGetChar(globalDelimiterIN,0);
-   ushort u_delim2=StringGetChar(globalDelimiter2IN,0);
-   for(int i=0;i<ArraySize(colExpMatchedListArrayOUT);i++)//iLoopcolExpMatchedListArrayOUT
-   {
-//=================================================================================================
-//=================================================================================================
-//=================================================================================================
-//
-//
-//
-//                           Item Hidden due to copyrighted material
-//                                   COPYRIGHT 2019 Ben Leong 
-//
-//
-//
-//=================================================================================================
-//=================================================================================================
-//=================================================================================================
-   }
-}
-//_________________________________________________________________________________________________
-//''''''''''''''''''''''''''''''''''''''''''''''''''''''''''''''''''''''''''''''''[ACTION FUNCTION]
-void CollateColExpMatchStringArray( string & colExpMatchedListArrayOUT[],string globalDelimiterIN,
-                                    string globalDelimiter2IN)
-{
-   ushort u_delim=StringGetChar(globalDelimiterIN,0);
-   ushort u_delim2=StringGetChar(globalDelimiter2IN,0);
-   string colExpMLArrayCopy[];
-   ArrayCopy(colExpMLArrayCopy,colExpMatchedListArrayOUT,0,0,WHOLE_ARRAY);
-   //Loop through the whole of colExpMatchedListArrayOUT to test for each item in jItemMatList.
-   //Starts at 1 because we don't want to compare with the one that is currently undergoing evaluation.
-   for(int i=1;i<ArraySize(colExpMatchedListArrayOUT);i++)//iLoopcolExpMatchedListArrayOUT
-   {
-//=================================================================================================
-//=================================================================================================
-//=================================================================================================
-//
-//
-//
-//                           Item Hidden due to copyrighted material
-//                                   COPYRIGHT 2019 Ben Leong 
-//
-//
-//
-//=================================================================================================
-//=================================================================================================
-//=================================================================================================
-   }
-}
-//_________________________________________________________________________________________________
-//''''''''''''''''''''''''''''''''''''''''''''''''''''''''''''''''''''''''''''''''[ACTION FUNCTION]
-void CreateMaxPeakArray(string & maxPeakArrayOUT[],string & colExpMatchedListArrayIN[],
-                        string & colExpMatchRepeatsArrayOUT[],string globalDelimiterIN,
-                        string globalDelimiter2IN)
-{
-   ushort u_delim=StringGetChar(globalDelimiterIN,0);
-   ushort u_delim2=StringGetChar(globalDelimiter2IN,0);
-   ArrayResize(maxPeakArrayOUT,ArraySize(colExpMatchRepeatsArrayOUT));
-   for(int i=0;i<ArraySize(colExpMatchedListArrayIN);i++)//iLoopcolExpMatchedListArrayIN
-   {
-//=================================================================================================
-//=================================================================================================
-//=================================================================================================
-//
-//
-//
-//                           Item Hidden due to copyrighted material
-//                                   COPYRIGHT 2019 Ben Leong 
-//
-//
-//
-//=================================================================================================
-//=================================================================================================
-//=================================================================================================
-   }
-}
-//_________________________________________________________________________________________________
-//''''''''''''''''''''''''''''''''''''''''''''''''''''''''''''''''''''''''''''''''[ACTION FUNCTION]
-void CreateGradientRecallArray(  string & mainTrendsArrayIN[],string & maxPeakArrayIN[],
-                                 string & gradientRecallArrayOUT[],string globalDelimiterIN,
-                                 int numOfTrendOriginsIN)
-{
-   ushort u_delim=StringGetChar(globalDelimiterIN,0);
-   int iCounter=0;
-   ArrayResize(gradientRecallArrayOUT,ArraySize(maxPeakArrayIN));
-   for(int i=0;i<ArraySize(maxPeakArrayIN);i++)//iLoopmaxPeakArrayIN
-   {
-//=================================================================================================
-//=================================================================================================
-//=================================================================================================
-//
-//
-//
-//                           Item Hidden due to copyrighted material
-//                                   COPYRIGHT 2019 Ben Leong 
-//
-//
-//
-//=================================================================================================
-//=================================================================================================
-//=================================================================================================
-   }
-}
-//_________________________________________________________________________________________________
-//''''''''''''''''''''''''''''''''''''''''''''''''''''''''''''''''''''''''''''''''[ACTION FUNCTION]
-void CreateSortedGradientRecallArray(  string & gradientRecallArrayIN[],
-                                       string & sortedGradientRecallArrayOUT[],
-                                       string globalDelimiterIN,
-                                       string globalDelimiter2IN,
-                                       string globalDelimiter3IN,
-                                       double percentChMatchIN)
-{
-   ushort u_delim=StringGetChar(globalDelimiterIN,0);
-   ushort u_delim2=StringGetChar(globalDelimiter2IN,0);
-   ushort u_delim3=StringGetChar(globalDelimiter3IN,0);
-   double gradientFlatArray[];
-   string totalBackRefString;
-   string delim3="";
-   int gradFlatArrCount=0;
-   int completeCounter=90000;
-   string gradCountString;
-   string gradString;
-   string delimiter="";
-//=================================================================================================
-//=================================================================================================
-//=================================================================================================
-//
-//
-//
-//                           Item Hidden due to copyrighted material
-//                                   COPYRIGHT 2019 Ben Leong 
-//
-//
-//
-//=================================================================================================
-//=================================================================================================
-//=================================================================================================
-}
-//_________________________________________________________________________________________________
-//''''''''''''''''''''''''''''''''''''''''''''''''''''''''''''''''''''''''''''''''[ACTION FUNCTION]
-void FilterSortedGradientRecallArray(string & sortedGradientRecallArrayOUT[],string globalDelimiterIN)
+//================================================================================================
+//================================================================================================
+//================================================================================================
+//================================================================================================
+//================================================================================================
+//================================================================================================
 
-{
-   ushort u_delim=StringGetChar(globalDelimiterIN,0);
-   for(int i=0;i<ArraySize(sortedGradientRecallArrayOUT);i++)//iLoopsortedGradientRecallArrayOUT
-   {
-//=================================================================================================
-//=================================================================================================
-//=================================================================================================
-//
-//
-//
+
 //                           Item Hidden due to copyrighted material
 //                                   COPYRIGHT 2019 Ben Leong 
-//
-//
-//
-//=================================================================================================
-//=================================================================================================
-//=================================================================================================
-   }
-}
-//_________________________________________________________________________________________________
-//''''''''''''''''''''''''''''''''''''''''''''''''''''''''''''''''''''''''''''''''[ACTION FUNCTION]
-void CreateMainTrendCategoryArray(  string & mainTrendsArrayIN[],string & colExpMatchStringArrayIN[],
-                                    string & gradientRecallArrayIN[],string globalDelimiterIN,
-                                    string globalDelimiter2IN,int numOfTrendOriginsIN,
-                                    bool is0PeakUpOrDownIN)
-{
-//=================================================================================================
-//=================================================================================================
-//=================================================================================================
-//
-//
-//
+
+
 //                           Item Hidden due to copyrighted material
 //                                   COPYRIGHT 2019 Ben Leong 
-//
-//
-//
-//=================================================================================================
-//=================================================================================================
-//=================================================================================================
-}
-//_________________________________________________________________________________________________
-//''''''''''''''''''''''''''''''''''''''''''''''''''''''''''''''''''''''''''''''''[ACTION FUNCTION]
-void CreateMainTrendObjects(  string & mainTrendsArrayIN[],string & maxPeakArrayIN[],
-                              string & gradientRecallArrayIN[],string globalDelimiterIN,
-                              int numOfTrendOriginsIN,color mainTrendlineColourIN,
-                              string & colExpMatchedListArrayIN[],string & sortedGradientRecallArrayIN[])
-{
-   ushort u_delim=StringGetChar(globalDelimiterIN,0);
-   int iCounter=0;
-   for(int i=0;i<ArraySize(maxPeakArrayIN);i++)//iLoopmaxPeakArrayIN
-   {
-      if(colExpMatchedListArrayIN[i]!="")
-      {
-//=================================================================================================
-//=================================================================================================
-//=================================================================================================
-//
-//
-//
+
+
 //                           Item Hidden due to copyrighted material
 //                                   COPYRIGHT 2019 Ben Leong 
-//
-//
-//
-//=================================================================================================
-//=================================================================================================
-//=================================================================================================
-   }
-}
-//_________________________________________________________________________________________________
-//''''''''''''''''''''''''''''''''''''''''''''''''''''''''''''''''''''''''''''''[PROVIDER FUNCTION]
-void ProvideSortingOfArray(string & buddyArray[],double & testedArray[],int begin,int end) 
-{
-    if (begin<end) 
-    {
-        int partitionIndex=ProvidePartition(buddyArray,testedArray,begin,end);
-        ProvideSortingOfArray(buddyArray,testedArray,begin,partitionIndex-1);
-        ProvideSortingOfArray(buddyArray,testedArray,partitionIndex+1,end);
-    }
-}
-//=========================================[DOCUMENTATION]=========================================
-//Uses quicksort algorithm.
-//_________________________________________________________________________________________________
-//''''''''''''''''''''''''''''''''''''''''''''''''''''''''''''''''''''''''''''''[PROVIDER FUNCTION]
-int ProvidePartition(string & buddyArray[],double & testedArray[],int begin,int end)
-{
-    double pivot=testedArray[end];
-    int i=(begin-1);
-    for(int j=begin;j<end;j++)
-    {
-        if (testedArray[j]<=pivot)
-        {
-            i++;
-            double swapTemp=testedArray[i];
-            testedArray[i]=testedArray[j];
-            testedArray[j]=swapTemp;
-            string swapBuddyTemp=buddyArray[i];
-            buddyArray[i]=buddyArray[j];
-            buddyArray[j]=swapBuddyTemp;
-        }
-    }
-    double swapTemp=testedArray[i+1];
-    testedArray[i+1]=testedArray[end];
-    testedArray[end]=swapTemp;
-    string swapBuddyTemp=buddyArray[i+1];
-    buddyArray[i+1]=buddyArray[end];
-    buddyArray[end]=swapBuddyTemp;
-    return i+1;
-}
-//_________________________________________________________________________________________________
-//''''''''''''''''''''''''''''''''''''''''''''''''''''''''''''''''''''''''''''''[PROVIDER FUNCTION]
-bool ProvideReplacementForMatches(  string & replacedArray[],string & replacedArrayDuplicate[],
-                                    string stringToTest,string delim1,
-                                    string delim2,int iOfMain)
-                                    //If this func returns true that means something was appended.
-                                    //This func PERFORMS the append, but DOES NOT delete anything. 
-{
-   ushort u_delim=StringGetChar(delim1,0);
-   ushort u_delim2=StringGetChar(delim2,0);
-   bool output=false;
-   string stringToTestArray[];
-   StringSplit(stringToTest,u_delim2,stringToTestArray);
-   //Loop through the whole of colExpMatchedListArrayIN to test for each item in jItemMatList.
-   for(int i=0;i<ArraySize(replacedArray)-iOfMain;i++)//iLoopcolExpMatchedListArrayIN
-   //-1 because we don't want to compare with the iOfMain that is currently undergoing evaluation. 
-   {
-      string iItem=replacedArrayDuplicate[i];
-      string iItemArray[];
-      StringSplit(iItem,u_delim,iItemArray);
-      for(int j=0;j<ArraySize(iItemArray);j++)//jLoopiItemArray 
-      {
-         string jItem=iItemArray[j];
-         string jItemBackup=jItem;
-         jItem=delim2+jItem+delim2;
-         int kCompleteStatus=0;
-         string jExtrasArray[];
-         int jExtrasCounter=0;
-         string stringToTestArrayDuplicate[];//If you use string stringToTestArray[] then 
-         //there will be blank errors.
-         ArrayCopy(stringToTestArrayDuplicate,stringToTestArray,0,0,WHOLE_ARRAY);
-         for(int k=0;k<ArraySize(stringToTestArrayDuplicate);k++)//kLoopstringToTestArrayDuplicate
-         {
-            string kTested=stringToTestArrayDuplicate[k];
-            kTested=delim2+kTested+delim2;
-            int kTestedStatus=StringFind(jItem,kTested,WHOLE_ARRAY);
-            if(kTestedStatus==-1)
-            {
-               ArrayResize(jExtrasArray,ArraySize(jExtrasArray)+1);
-               jExtrasArray[jExtrasCounter]=stringToTestArrayDuplicate[k];
-               jExtrasCounter++;
-            }
-            else
-            {
-               kCompleteStatus++;
-               stringToTestArrayDuplicate[k]="";
-            }
-         }
-         string stringToAppend;
-         if(kCompleteStatus>1)//If kCompleteStatus shows 2 or more matches. 
-         {
-            //Creates the string to be appended to the item we are comparing with. 
-            for(int k=0;k<ArraySize(jExtrasArray);k++)//kLoopjExtrasArray
-            {
-               stringToAppend=stringToAppend+delim2+jExtrasArray[k];
-            }
-            //CRUCIAL: Replaces the iItem in colExpMatchedListArrayIN with the appended. 
-            StringReplace(iItem,jItemBackup,jItemBackup+stringToAppend);
-            replacedArray[i]=iItem;
-            output=true;//Means something was appended.
-         }
-         if(output==true){break;}
-      }
-      if(output==true){break;}
-   }
-   return output;
-}
-//=========================================[DOCUMENTATION]=========================================
-//Single use function
-//_________________________________________________________________________________________________
-//''''''''''''''''''''''''''''''''''''''''''''''''''''''''''''''''''''''''''''''[PROVIDER FUNCTION]
-string ProvideMainTrendMatchStringArray( string matchString,string IDString)
-{
-   return(  "<"+matchString+","+IDString+">");
-}
-//_________________________________________________________________________________________________
-//''''''''''''''''''''''''''''''''''''''''''''''''''''''''''''''''''''''''''''''[PROVIDER FUNCTION]
-string ProvideIntArrayToString(int & intArray[])
-{
-   string theString;
-   for(int i=0;i<ArraySize(intArray);i++)//iLoopintArray
-   {
-      theString=theString+IntegerToString(intArray[i])+",";
-   }
-   string output=StringSubstr(theString,0,StringLen(theString)-1);
-   output="<"+output+">";
-   return(output);
-}
-//_________________________________________________________________________________________________
-//''''''''''''''''''''''''''''''''''''''''''''''''''''''''''''''''''''''''''''''[PROVIDER FUNCTION]
-void ProvideDuplicateTrendExclusionArray(int & intArrayToAnalyze[],int & intArrayOfExclusions[])
-{
-   int arraySizeOfAnalyzed=ArraySize(intArrayToAnalyze);
-   int arraySizeOfExclusions=ArraySize(intArrayOfExclusions);
-   if(arraySizeOfAnalyzed!=1)
-   {
-      int arraysizeOfNewExclusionArray=arraySizeOfExclusions+arraySizeOfAnalyzed-1;
-      int nextValueIDInExclusionArray=arraySizeOfExclusions;
-      ArrayResize(intArrayOfExclusions,arraysizeOfNewExclusionArray+1);
-      ArrayCopy(intArrayOfExclusions,intArrayToAnalyze,nextValueIDInExclusionArray,1,arraySizeOfAnalyzed-1);
-   }
-}
-//_________________________________________________________________________________________________
-//''''''''''''''''''''''''''''''''''''''''''''''''''''''''''''''''''''''''''''''[PROVIDER FUNCTION]
-void ProvideBinToDigits(int & binArray[],int & numArray[],int addFactor)
-{
-   ArrayResize(numArray,0);
-   int newSize=0;
-   int counter=0;
-   for(int i=0;i<ArraySize(binArray);i++)//iLoopbinArray
-   {
-      if(binArray[i]==1)
-      {
-         int zigZagAdjustment=i+addFactor+2;
-         ArrayResize(numArray,ArraySize(numArray)+1);
-         numArray[counter]=zigZagAdjustment;
-         counter++;
-      }
-   }
-}
-//_________________________________________________________________________________________________
-//''''''''''''''''''''''''''''''''''''''''''''''''''''''''''''''''''''''''''''''[PROVIDER FUNCTION]
-void ProvideMatchLocationsInArray(  double & arrayToAnalyse[],double itemToMatch,
-                                    double margin,int & tempArrayForTrendMatching[])
-{
-   ArrayResize(tempArrayForTrendMatching,0);
-   ArrayResize(tempArrayForTrendMatching,ArraySize(arrayToAnalyse));
-   for(int i=0;i<ArraySize(arrayToAnalyse);i++)//iLooparrayToAnalyse
-   {
-      double theCeiling=itemToMatch+MathAbs(itemToMatch)*margin;
-      double theFloor=itemToMatch-MathAbs(itemToMatch)*margin;
-      if(arrayToAnalyse[i]<=theCeiling&&arrayToAnalyse[i]>=theFloor)
-      {
-         tempArrayForTrendMatching[i]=1;
-      }
-      else
-      {
-         tempArrayForTrendMatching[i]=0;
-      }
-   }
-}
-//_________________________________________________________________________________________________
-//''''''''''''''''''''''''''''''''''''''''''''''''''''''''''''''''''''''''''''''[PROVIDER FUNCTION]
-bool ProvideIfIntItemIsInArray(int intItem,int & intArray[])
-{
-   bool output=false;
-   for(int i=0;i<ArraySize(intArray);i++)//iLoopintArray
-   {
-      if(intArray[i]==intItem)
-      {
-         output=true;
-         break;
-      }
-   }
-   return(output);
-}
-//_________________________________________________________________________________________________
-//''''''''''''''''''''''''''''''''''''''''''''''''''''''''''''''''''''''''''''''[PROVIDER FUNCTION]
-void ProvideArrayExtraction(  double & arrayToBeExtracted[],double & arrayToExtractTo[],
-                              int newArraySize,int beginOfExtractedArray)
-{
-   ArrayResize(arrayToExtractTo,0);
-   ArrayResize(arrayToExtractTo,newArraySize);
-   ArrayCopy(arrayToExtractTo,arrayToBeExtracted,0,beginOfExtractedArray,newArraySize);
-}
-//_________________________________________________________________________________________________
-//''''''''''''''''''''''''''''''''''''''''''''''''''''''''''''''''''''''''''''''[PROVIDER FUNCTION]
-void ProvideMuxedStringToDoubleConversion(   string & arrayToBeDemuxedAndConv[],int locationOfMux,
-                                             double & arrayToOutput[])
-{
-   ArrayResize(arrayToOutput,0);
-   ArrayResize(arrayToOutput,ArraySize(arrayToBeDemuxedAndConv));
-   for(int i=0;i<ArraySize(arrayToBeDemuxedAndConv);i++)//iLooparrayToBeDemuxedAndConv
-   {
-      arrayToOutput[i]=StrToDouble(StringDemux(arrayToBeDemuxedAndConv[i],locationOfMux,","));
-   }
-}
-//_________________________________________________________________________________________________
-//''''''''''''''''''''''''''''''''''''''''''''''''''''''''''''''''''''''''''''''[PROVIDER FUNCTION]
-string ProvideMainTrendArray( double oPrice,    int oNum,               int oBar,
-                              double jPrice,    int jNum,               int jBar,
-                              double gradient,  double yInterceptRight, double yInterceptLeft,
-                              int iCounter,     int jCounter,           double yIntercept0,
-                              double microPipAdjGrad
-                              )
-{
-   return(  "<"+
-            DoubleToStr(oPrice)+","+         IntegerToString(oNum)+","+
-            IntegerToString(oBar)+","+       DoubleToStr(jPrice)+","+
-            IntegerToString(jNum)+","+       IntegerToString(jBar)+","+
-            DoubleToStr(gradient)+","+       DoubleToStr(yInterceptRight)+","+
-            DoubleToStr(yInterceptLeft)+","+ IntegerToString(iCounter)+","+
-            IntegerToString(jCounter)+","+   DoubleToStr(yIntercept0)+","+
-            DoubleToStr(microPipAdjGrad)+
-            ">");
-}
-//________________________________________________________________________________________________
-//\\\\\\\\\\\\\\\\\\\\\\\\\\\\\\\\\\\\\\\\\\\\\\CLASS/////////////////////////////////////////////|--- [Future Point Intersections]
-//""""""""""""""""""""""""""""""""""""""""""""""""""""""""""""""""""""""""""""""""""""""""""""""""'
-//_________________________________________________________________________________________________
-//''''''''''''''''''''''''''''''''''''''''''''''''''''''''''''''''''''''''''''''''''''''[EXECUTION]
-void FuturePointExecution(string & mainTrendsArrayPSG[],string & mainTrendsIDArrayPSG[])
-{
-//=================================================================================================
-//=================================================================================================
-//=================================================================================================
-//
-//
-//
-//                           Item Hidden due to copyrighted material
-//                                   COPYRIGHT 2019 Ben Leong 
-//
-//
-//
-//=================================================================================================
-//=================================================================================================
-//=================================================================================================
-}
-//_________________________________________________________________________________________________
-//''''''''''''''''''''''''''''''''''''''''''''''''''''''''''''''''''''''''''''''''[ACTION FUNCTION]
-void CreateFuturePointsIDArray(string & mainTrendsArrayPSGIN[],string & futurePointsIDArrayOUT[])
-{
-//=================================================================================================
-//=================================================================================================
-//=================================================================================================
-//
-//
-//
-//                           Item Hidden due to copyrighted material
-//                                   COPYRIGHT 2019 Ben Leong 
-//
-//
-//
-//=================================================================================================
-//=================================================================================================
-//=================================================================================================
-}
+
+
+//================================================================================================
+//================================================================================================
+//================================================================================================
+//================================================================================================
+//================================================================================================
+//================================================================================================
 //________________________________________________________________________________________________
 //\\\\\\\\\\\\\\\\\\\\\\\\\\\\\\\\\\\\\\\\\\\\\\CLASS/////////////////////////////////////////////|--- [Middle Proximity Trendline Indicator]
 //""""""""""""""""""""""""""""""""""""""""""""""""""""""""""""""""""""""""""""""""""""""""""""""""'
@@ -2423,13 +2628,13 @@ void CreateMidTrendsDataArray()
    ArrayResize(midTrendsDataArray,totalNumberOfMidTrends*2);
    for(int i=0;i<totalNumberOfMidTrends;i++)//iLoopnumberOfMidTrends
    {
-      double point1Price=StringToDouble(StringDemux(zigZagPeakID[1+i],0,","));
-      int point1Num=StrToInteger(StringDemux(zigZagPeakID[1+i],1,","));
-      int point1Bar=StrToInteger(StringDemux(zigZagPeakID[1+i],2,","));
+      double point1Price=StringToDouble(StringDemux(zigZagPeakIDGLO[1+i],0,","));
+      int point1Num=StrToInteger(StringDemux(zigZagPeakIDGLO[1+i],1,","));
+      int point1Bar=StrToInteger(StringDemux(zigZagPeakIDGLO[1+i],2,","));
       
-      double point2Price=StringToDouble(StringDemux(zigZagPeakID[3+i],0,","));
-      int point2Num=StrToInteger(StringDemux(zigZagPeakID[3+i],1,","));
-      int point2Bar=StrToInteger(StringDemux(zigZagPeakID[3+i],2,","));
+      double point2Price=StringToDouble(StringDemux(zigZagPeakIDGLO[3+i],0,","));
+      int point2Num=StrToInteger(StringDemux(zigZagPeakIDGLO[3+i],1,","));
+      int point2Bar=StrToInteger(StringDemux(zigZagPeakIDGLO[3+i],2,","));
       
       double pointGradient=-1*(
                                  (point1Price-point2Price)
@@ -2459,7 +2664,7 @@ void CreateMidTrendsObjects()
       timeOfTheBarP2=ProvideBarToTimeConversionUniversal(barOfObjectP2);
       colorOfObject=midTrendlineColour;
       NameTLine("MidTrend_");
-      CreateTLine(0,2);
+      CreateTLine(0,2,1,colorOfObject);
    }
 }
 //_________________________________________________________________________________________________
@@ -2478,11 +2683,11 @@ void CreateMeanGradientObjects()
 {
    for(int i=0;i<numberOfMidTrendsSections;i++)//iLoopnumberOfMidTrendsSections
    {
-      priceLevel=Ask+microPipM100*3;
-      int peakID=StrToInteger(StringDemux(zigZagPeakID[midTrendsSectionsSizeArray[i]],2,","));
+      priceLevel=Ask+microPipM100GLO*3;
+      int peakID=StrToInteger(StringDemux(zigZagPeakIDGLO[midTrendsSectionsSizeArray[i]],2,","));
       ProvideBarToTimeConversion(peakID);
       NameTextBox("MidTrend_");
-      CreateTextBox("S"+IntegerToString(i+1)+":"+DoubleToStr(meanMidTrendsGradientArray[i],2),8,clrIvory);
+      CreateTextBox("S"+IntegerToString(i+1)+":"+DoubleToStr(meanMidTrendsGradientArray[i],2),8,clrIvory,0);
    }
 }
 //_________________________________________________________________________________________________
@@ -2556,13 +2761,13 @@ void CreateProxChannelDataArray()
    ArrayResize(midTrendsDataArray,numberOfChannels*2);
    for(int i=0;i<numberOfChannels;i++)//iLoopnumberOfMidTrends
    {
-      double point1Price=StringToDouble(StringDemux(zigZagPeakID[1+i],0,","));
-      int point1Num=StrToInteger(StringDemux(zigZagPeakID[1+i],1,","));
-      int point1Bar=StrToInteger(StringDemux(zigZagPeakID[1+i],2,","));
+      double point1Price=StringToDouble(StringDemux(zigZagPeakIDGLO[1+i],0,","));
+      int point1Num=StrToInteger(StringDemux(zigZagPeakIDGLO[1+i],1,","));
+      int point1Bar=StrToInteger(StringDemux(zigZagPeakIDGLO[1+i],2,","));
       
-      double point2Price=StringToDouble(StringDemux(zigZagPeakID[3+i],0,","));
-      int point2Num=StrToInteger(StringDemux(zigZagPeakID[3+i],1,","));
-      int point2Bar=StrToInteger(StringDemux(zigZagPeakID[3+i],2,","));
+      double point2Price=StringToDouble(StringDemux(zigZagPeakIDGLO[3+i],0,","));
+      int point2Num=StrToInteger(StringDemux(zigZagPeakIDGLO[3+i],1,","));
+      int point2Bar=StrToInteger(StringDemux(zigZagPeakIDGLO[3+i],2,","));
       
       double pointGradient=-1*(
                                  (point1Price-point2Price)
@@ -2721,20 +2926,54 @@ string TrendChannelArray(  double pointPrice,   int pointNum,        int pointBa
 //_______________________________________________________________________________________________
 //\\\\\\\\\\\\\\\\\\\\\\\\\\\\\\\\\\\\\\\\\\\\\\CLASS/////////////////////////////////////////////|--- [Buy-Sell Objects]
 //""""""""""""""""""""""""""""""""""""""""""""""""""""""""""""""""""""""""""""""""""""""""""""""""'
-//=================================================================================================
-//=================================================================================================
-//=================================================================================================
-//
-//
-//
-//                           Item Hidden due to copyrighted material
-//                                   COPYRIGHT 2019 Ben Leong 
-//
-//
-//
-//=================================================================================================
-//=================================================================================================
-//=================================================================================================
+//_________________________________________________________________________________________________
+//''''''''''''''''''''''''''''''''''''''''''''''''''''''''''''''''''''''''''''''''''''''[VARIABLES]
+int isBullStochXAndEMAAvailArray[];
+int isBearStochXAndEMAAvailArray[];
+//_________________________________________________________________________________________________
+//''''''''''''''''''''''''''''''''''''''''''''''''''''''''''''''''''''''''''''''''[ACTION FUNCTION]
+void CreateisBuySellAvailArray()
+{
+   //ArrayResize(isBullStochXAndEMAAvailArray,barsToAnalyzeStochX);
+   //ArrayResize(isBearStochXAndEMAAvailArray,barsToAnalyzeStochX);
+   //for(int i=0;i<barsToAnalyzeStochX;i++)//iLoopbarsToAnalyzeStochX
+   //{
+   //   if(stochXEMAIfPosArray[i]==1&&ifBarIsOversoldStochXArray[i]==1)
+   //   {
+   //      isBullStochXAndEMAAvailArray[i]=1;
+   //   }
+   //   if(stochXEMAIfPosArray[i]==0&&ifBarIsOverboughtStochXArray[i]==1)
+   //   {
+   //      isBearStochXAndEMAAvailArray[i]=1;
+   //   }
+   //}
+}
+//_________________________________________________________________________________________________
+//''''''''''''''''''''''''''''''''''''''''''''''''''''''''''''''''''''''''''''''''[ACTION FUNCTION]
+void CreateBuySellIndicatorObjects()
+{
+   //for(int i=0;i<barsToAnalyzeStochX;i++)//iLoopbarsToAnalyzeStochX
+   //{
+   //   if(isBullStochXAndEMAAvailArray[i]==1)
+   //   {
+   //      priceLevel=Ask;
+   //      barOfObject=i;
+   //      ProvideBarToTimeConversion(barOfObject);
+   //      colorOfObject=bullStochXObjColour;
+   //      NameSmallArrow("StochX_Bull_");
+   //      CreateSArrow();
+   //   }
+   //   else if(isBearStochXAndEMAAvailArray[i]==1)
+   //   {
+   //      priceLevel=Ask;
+   //      barOfObject=i;
+   //      ProvideBarToTimeConversion(barOfObject);
+   //      colorOfObject=bearStochXObjColour;
+   //      NameSmallArrow("StochX_Bear_");
+   //      CreateSArrow();
+   //   }
+   //}
+}
 //________________________________________________________________________________________________
 //\\\\\\\\\\\\\\\\\\\\\\\\\\\\\\\\\\\\\\\\\\\\\\CLASS/////////////////////////////////////////////|--- [General Utilities Actions]
 //""""""""""""""""""""""""""""""""""""""""""""""""""""""""""""""""""""""""""""""""""""""""""""""""'
@@ -2846,21 +3085,7 @@ void SizeAllCSVArraysToEqualLength(int universalSize)
 }
 //_________________________________________________________________________________________________
 //''''''''''''''''''''''''''''''''''''''''''''''''''''''''''''''''''''''''''''''''[ACTION FUNCTION]
-void GenerateCSVOutputArrays()
-{
-   for(int i=0;i<maxZigZagBar;i++)//iLoopmaxZigZagBar
-   {
-      int provided=ProvideLocaleOfMatchInLocaleOfMuxedArray(zigZagPeakID,2,barsArray[i]);
-      if(provided!=999999999)
-      {
-         tempFilePrintArray1[i]=zigZagPeakID[provided];
-      }
-      else
-      {
-         tempFilePrintArray1[i]="";
-      }
-   }
-}
+
 //_________________________________________________________________________________________________
 //''''''''''''''''''''''''''''''''''''''''''''''''''''''''''''''''''''''''''''''''[ACTION FUNCTION]
 void TransferAllCSVArraysToTemp()
@@ -3016,6 +3241,12 @@ void FillUpOneStringArrayWithAnother(string & arrayToCopy[],string & arrayToFill
 void PrintToConsole()
 {
    Print("Debug String: "+debugString);
+   //Print(ArraySize(mTMTempArray2));
+   //Print(PrintOutArrayInt(mTMTempArray2));
+   //Print(PrintOutArrayChar(mainTrendsMatchesArray));
+   //FileWriteArray(fileHandle,zigZagBarsArray,0,WHOLE_ARRAY);
+   //Print(PrintOutArrayDouble(testArrayDebug));
+   //Print(PrintOutArrayString(mTMTempArray2));
 }
 //_________________________________________________________________________________________________
 //''''''''''''''''''''''''''''''''''''''''''''''''''''''''''''''''''''''''''''''[PROVIDER FUNCTION]
@@ -3070,17 +3301,20 @@ string PrintOutArrayChar(char & arrayToLog[])
    return(printedArray);
 }
 //_________________________________________________________________________________________________
-//=================================================================================================
-//=================================================================================================
-//=================================================================================================
+
+
+
+         
+//      //==========================================DEBUG======================================
 //
-//
-//
-//                           Item Hidden due to copyrighted material
-//                                   COPYRIGHT 2019 Ben Leong 
-//
-//
-//
-//=================================================================================================
-//=================================================================================================
-//=================================================================================================
+//      if(i==39)
+//      {
+//         debugString=currentString;
+//         ArrayResize(testStrArrayDebug,ArraySize(newCurrentMatches));
+//         ArrayCopy(testStrArrayDebug,newCurrentMatches,0,0,WHOLE_ARRAY);
+//         ArrayResize(testIntArrayDebug,ArraySize(ifItemHasChanged));
+//         ArrayCopy(testIntArrayDebug,ifItemHasChanged,0,0,WHOLE_ARRAY);
+//         break;
+//      }
+//      //==========================================DEBUG====================================== 
+         
